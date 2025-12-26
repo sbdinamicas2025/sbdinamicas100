@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SBDINÁMICAS | Gestión de Rifas</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top left, #1e293b, #0f172a);
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    .glass-panel {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px rgba(0,0,0,.5);
+    }
+    .glass-input {
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.15);
+      color: white;
+    }
+    .scroll-grid {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    .scroll-grid::-webkit-scrollbar { width: 6px; }
+    .scroll-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+    .state-available { background: rgba(255,255,255,0.12); border: 1px dashed rgba(255,255,255,0.25); }
+    .state-reserved { background: rgba(234,179,8,.25); border: 1px solid #eab308; }
+    .state-sold { background: rgba(34,197,94,.25); border: 1px solid #22c55e; }
+
+    .winner-highlight {
+      border: 3px solid #fbbf24 !important;
+      box-shadow: 0 0 20px #fbbf24;
+      animation: pulse-gold 2s infinite;
+    }
+    @keyframes pulse-gold {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .pantallazo-mode { background: #f3f4f6 !important; display: flex; justify-content: center; align-items: center; }
+    .pantallazo-mode .no-print { display: none !important; }
+    .pantallazo-mode #printable { background: white !important; color: #111827 !important; max-width: 480px; width: 100%; border-radius: 32px; }
+    
+    .watermark {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 4rem; font-weight: 900; color: rgba(0,0,0,.03); pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+<a id="whatsappBtn" href="#" target="_blank" class="no-print fixed bottom-6 right-6 w-16 h-16 bg-[#25d366] rounded-full flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition-all z-40 hidden">
+  <svg width="35" height="35" fill="white" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.893-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.89-11.893 11.89-1.997 0-3.951-.5-5.688-1.448l-6.308 1.668zm6.29-3.41c1.574.933 3.103 1.403 4.66 1.403 5.396 0 9.786-4.391 9.786-9.786 0-5.392-4.385-9.783-9.78-9.783-2.617 0-5.08 1.018-6.931 2.87-1.85 1.851-2.868 4.315-2.868 6.913 0 1.706.467 3.374 1.35 4.83l-1.006 3.673 3.795-.997zm11.332-6.845c-.312-.156-1.848-.912-2.135-1.017-.286-.106-.495-.156-.704.156-.21.312-.806.989-.989 1.198-.182.208-.364.234-.676.078-.312-.156-1.318-.486-2.51-1.548-.928-.827-1.554-1.849-1.735-2.16-.182-.312-.02-.481.136-.636.141-.14.312-.364.468-.547.156-.182.208-.312.312-.52.104-.208.052-.39-.026-.547-.078-.156-.704-1.691-.963-2.316-.252-.61-.51-.527-.704-.537-.182-.01-.39-.01-.598-.01-.208 0-.547.078-.833.39-.286.312-1.094 1.067-1.094 2.603 0 1.536 1.12 3.02 1.275 3.228.156.208 2.205 3.367 5.341 4.726.745.323 1.327.516 1.78.66.748.238 1.43.205 1.968.124.6-.09 1.848-.755 2.11-1.485.26-.73.26-1.354.182-1.485-.078-.13-.286-.208-.598-.364z"/></svg>
+</a>
+
+<button onclick="handleAdminClick()" id="adminBtn" class="no-print fixed top-6 right-6 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center text-2xl transition-all z-40">⚙️</button>
+
+<div id="adminPanel" class="no-print fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
+  <div class="glass-panel p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto text-white">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-black italic underline decoration-blue-500">ADMIN PANEL</h1>
+      <button onclick="closeAdmin()" class="text-3xl hover:rotate-90 transition-transform">×</button>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-6">
+      <input id="title" oninput="updateHeader()" class="glass-input p-3 rounded-xl" value="DINÁMICA FLASH">
+      <input id="prize" oninput="updateHeader()" class="glass-input p-3 rounded-xl" value="PREMIO $3.000.000">
+      <input id="value" oninput="updateHeader()" class="glass-input p-3 rounded-xl" value="VALOR $60.000">
+      <input id="date" oninput="updateHeader()" class="glass-input p-3 rounded-xl" value="DICIEMBRE 2025">
+      <input id="footer" oninput="updateHeader()" class="glass-input p-3 rounded-xl md:col-span-2" value="JUEGA CON LAS DOS ÚLTIMAS CIFRAS">
+    </div>
+
+    <div class="border-t border-white/10 pt-4 mb-6 text-center">
+      <h3 class="text-yellow-500 font-black mb-2 uppercase">🏆 REGISTRAR SORTEO (4 CIFRAS)</h3>
+      <div class="flex gap-2">
+        <input id="winningNumber" maxlength="4" placeholder="Ej: 5482" class="glass-input flex-1 p-3 rounded-xl text-center text-2xl font-black">
+        <button onclick="verificarSorteo()" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-xl font-bold transition-colors">SORTEAR</button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <button onclick="pantallazo()" class="w-full bg-white text-black font-black py-3 rounded-xl hover:scale-105 transition-transform">📸 MODO PANTALLAZO</button>
+      <button onclick="clearAll()" class="w-full bg-red-500/20 text-red-400 py-3 rounded-xl font-bold hover:bg-red-500/40">🗑️ REINICIAR TODO</button>
+      <button onclick="logout()" class="w-full py-3 bg-slate-800 text-slate-400 rounded-xl font-bold hover:text-red-400 transition-all">🚪 CERRAR SESIÓN</button>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto">
+  <div id="resultsBanner" class="hidden glass-panel p-4 mb-6 border-blue-500/50 text-center animate-pulse">
+      <h4 class="text-blue-400 font-black text-sm">RESULTADO: <span id="resFull" class="text-white text-xl ml-2"></span></h4>
+      <div class="grid grid-cols-3 gap-2 mt-2 text-[10px] font-bold">
+          <div class="bg-white/5 p-1 rounded-lg italic">Menor: <span id="resMenor"></span></div>
+          <div class="bg-white/5 p-1 rounded-lg italic">Medio: <span id="resMedio"></span></div>
+          <div class="bg-white/10 p-1 rounded-lg border border-yellow-500/30">Mayor: <span id="resMayor"></span></div>
+      </div>
+  </div>
+
+  <div id="printable" class="glass-panel p-6 relative">
+    <div class="text-center mb-6">
+      <h2 id="showTitle" class="text-3xl font-black uppercase italic tracking-tighter"></h2>
+      <p id="showPrize" class="font-black text-blue-400 text-xl"></p>
+      <p id="showValue" class="text-slate-400 font-bold"></p>
+    </div>
+
+    <div class="relative scroll-grid">
+      <div class="watermark">SB</div>
+      <div id="grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 relative z-10"></div>
+    </div>
+
+    <div class="mt-8 border-t border-white/10 pt-6">
+        <h4 class="text-center font-black text-xs text-slate-400 mb-4 uppercase tracking-[0.3em]">TOCA PARA PAGAR</h4>
+        <div class="flex justify-center items-center gap-12">
+            <div onclick="irAPagar('Nequi')" class="text-center cursor-pointer hover:scale-110 transition-all">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Logo_Nequi.png/800px-Logo_Nequi.png" class="h-10 mx-auto mb-1">
+                <p class="text-[10px] font-black text-[#ff0092]">NEQUI</p>
+            </div>
+            <div onclick="irAPagar('Daviplata')" class="text-center cursor-pointer hover:scale-110 transition-all">
+                <img src="https://static.wixstatic.com/media/8931a2_0b28e2447d2547b79144368153b00688~mv2.png" class="h-10 mx-auto mb-1">
+                <p class="text-[10px] font-black text-red-500">DAVIPLATA</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 text-center">
+      <div id="participantPanel" class="no-print glass-panel p-6 mb-6 hidden border-green-500/30">
+        <h3 class="font-black text-xl mb-4 text-white italic">REGISTRAR PARTICIPANTE</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <input id="partName" class="glass-input p-3 rounded-xl" placeholder="Nombre completo">
+          <input id="partPhone" class="glass-input p-3 rounded-xl" placeholder="Celular" type="tel">
+        </div>
+        <div id="selectedNumbers" class="mt-4 flex flex-wrap gap-2 justify-center"></div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="confirmParticipant()" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-black hover:bg-green-600 transition-colors">✅ GUARDAR VENTA</button>
+          <button onclick="cancelSelection()" class="flex-1 bg-red-500/10 text-red-400 py-3 rounded-xl font-bold hover:bg-red-500/20">❌ CANCELAR</button>
+        </div>
+      </div>
+      
+      <p id="showFooter" class="font-black uppercase text-sm"></p>
+      <p id="showDate" class="text-xs text-slate-500 mt-2 font-bold"></p>
+    </div>
+  </div>
+</div>
+
+<button id="exitShot" onclick="salirPantallazo()" class="fixed top-6 right-6 bg-red-600 text-white px-6 py-3 rounded-xl hidden z-50 font-black">SALIR ×</button>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+    authDomain: "sbdinamicas-2025.firebaseapp.com",
+    projectId: "sbdinamicas-2025",
+    storageBucket: "sbdinamicas-2025.firebasestorage.app",
+    messagingSenderId: "465275725018",
+    appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const docRef = doc(db, "rifas", "actual");
+
+  // --- CONFIGURACIÓN CONTACTO ---
+  const MI_TELEFONO = "573215714548";
+
+  let data = [];
+  let selectedNums = [];
+  let isSelecting = false;
+  let currentUser = null;
+  let winners = { menor: '', medio: '', mayor: '', full: '' };
+  const STATES = ['state-available','state-reserved','state-sold'];
+
+  // --- WHATSAPP ---
+  window.updateWhatsappButton = () => {
+      const btn = document.getElementById('whatsappBtn');
+      if (selectedNums.length > 0 && !currentUser) {
+          btn.classList.remove('hidden');
+          const lista = selectedNums.map(idx => data[idx].number).sort().join(', ');
+          const msg = `¡Hola! Me interesan los números: *${lista}*. ¿Cómo puedo realizar el pago?`;
+          btn.href = `https://wa.me/${MI_TELEFONO}?text=${encodeURIComponent(msg)}`;
+      } else {
+          btn.classList.add('hidden');
+      }
+  };
+
+  window.irAPagar = (metodo) => {
+      const msg = `¡Hola! Quiero pagar mis números de la rifa por *${metodo}*. ¿Me envías los datos?`;
+      window.open(`https://wa.me/${MI_TELEFONO}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  // --- AUTH ---
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    document.getElementById('adminBtn').textContent = user ? "🛡️" : "⚙️";
+    if (!user) closeAdmin();
+    renderGrid();
+  });
+
+  window.handleAdminClick = async () => {
+    if (!currentUser) {
+      const email = prompt("Email Admin:");
+      const pass = prompt("Contraseña:");
+      if(email && pass) {
+          try { await signInWithEmailAndPassword(auth, email, pass); } 
+          catch (e) { alert("Error de acceso."); }
+      }
+    } else {
+      document.getElementById('adminPanel').classList.replace('hidden', 'flex');
+    }
+  };
+
+  window.closeAdmin = () => document.getElementById('adminPanel').classList.replace('flex', 'hidden');
+  window.logout = () => signOut(auth).then(() => window.location.reload());
+
+  // --- FIREBASE SYNC ---
+  async function sync() {
+    if (!currentUser) return;
+    try {
+        await setDoc(docRef, { 
+            data, winners,
+            config: {
+                title: document.getElementById('title').value,
+                prize: document.getElementById('prize').value,
+                value: document.getElementById('value').value,
+                date: document.getElementById('date').value,
+                footer: document.getElementById('footer').value
+            }
+        });
+    } catch (e) { console.error(e); }
+  }
+
+  onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const remote = docSnap.data();
+      data = remote.data;
+      winners = remote.winners || { menor: '', medio: '', mayor: '', full: '' };
+      if (remote.config) {
+        document.getElementById('title').value = remote.config.title;
+        document.getElementById('prize').value = remote.config.prize;
+        document.getElementById('value').value = remote.config.value;
+        document.getElementById('date').value = remote.config.date;
+        document.getElementById('footer').value = remote.config.footer;
+      }
+      showWinnersBanner();
+      updateHeader();
+      renderGrid();
+    } else { initGrid(); }
+  });
+
+  function initGrid() {
+    data = Array.from({length: 100}, (_, i) => ({
+      number: i.toString().padStart(2,'0'),
+      participant: null, state: 0
+    }));
+    renderGrid();
+  }
+
+  window.verificarSorteo = async () => {
+      const v = document.getElementById('winningNumber').value;
+      if (v.length !== 4) return alert("Ingresa 4 cifras.");
+      winners = { full: v, menor: v.substring(0,2), medio: v.substring(1,3), mayor: v.substring(2,4) };
+      await sync();
+  };
+
+  function showWinnersBanner() {
+      if(!winners.full) return;
+      document.getElementById('resultsBanner').classList.remove('hidden');
+      document.getElementById('resFull').textContent = winners.full;
+      document.getElementById('resMenor').textContent = winners.menor;
+      document.getElementById('resMedio').textContent = winners.medio;
+      document.getElementById('resMayor').textContent = winners.mayor;
+  }
+
+  window.updateHeader = () => {
+    document.getElementById('showTitle').textContent = document.getElementById('title').value;
+    document.getElementById('showPrize').textContent = document.getElementById('prize').value;
+    document.getElementById('showValue').textContent = document.getElementById('value').value;
+    document.getElementById('showFooter').textContent = document.getElementById('footer').value;
+    document.getElementById('showDate').textContent = document.getElementById('date').value;
+  };
+
+  window.renderGrid = () => {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    data.forEach((item, index) => {
+      const cell = document.createElement('div');
+      const isSelected = selectedNums.includes(index);
+      const isWinner = (winners.full && (item.number === winners.mayor || item.number === winners.medio || item.number === winners.menor));
+      
+      cell.className = `aspect-square rounded-xl flex items-center justify-center text-center p-1 cursor-pointer relative transition-all ${STATES[item.state]} ${isSelected ? 'ring-4 ring-blue-500 scale-110 shadow-lg z-20' : ''} ${isWinner ? 'winner-highlight' : ''}`;
+
+      cell.onclick = () => {
+        if (item.state === 2) return;
+        if (item.state === 0 || (isSelecting && item.state === 1 && selectedNums.includes(index))) {
+          toggleNumber(index);
+        } else if (item.state === 1 && !isSelecting) {
+          if (item.participant) alert(`👤 ${item.participant.name}\n📱 ${item.participant.phone}`);
+        }
+      };
+
+      cell.ondblclick = async (e) => {
+        e.stopPropagation();
+        if (currentUser && item.state === 1) {
+          if (confirm('¿Confirmar como VENDIDO?')) { data[index].state = 2; await sync(); }
+        }
+      };
+
+      const displayName = item.participant ? `${item.participant.name.substring(0, 7)}.` : '';
+      cell.innerHTML = `
+        <span class="absolute top-1 left-1 text-[8px] font-black opacity-30">${item.number}</span>
+        ${isWinner ? '<span class="absolute -top-1 -right-1 text-xs">⭐</span>' : ''}
+        <span class="text-[9px] font-black uppercase text-slate-800">${displayName}</span>
+      `;
+      grid.appendChild(cell);
+    });
+  };
+
+  window.toggleNumber = (index) => {
+    if (!isSelecting) {
+      isSelecting = true;
+      if(currentUser) document.getElementById('participantPanel').classList.remove('hidden');
+    }
+    const idx = selectedNums.indexOf(index);
+    if (idx > -1) selectedNums.splice(idx, 1);
+    else if (selectedNums.length < 10) selectedNums.push(index);
+    
+    updateSelectedDisplay();
+    window.updateWhatsappButton();
+    renderGrid();
+  };
+
+  function updateSelectedDisplay() {
+    const container = document.getElementById('selectedNumbers');
+    container.innerHTML = '';
+    selectedNums.sort((a,b)=>a-b).forEach(idx => {
+      const b = document.createElement('span');
+      b.className = 'bg-blue-600 text-white px-3 py-1 rounded-lg font-black text-xs shadow-md';
+      b.textContent = data[idx].number;
+      container.appendChild(b);
+    });
+  }
+
+  window.confirmParticipant = async () => {
+    const name = document.getElementById('partName').value.trim();
+    const phone = document.getElementById('partPhone').value.trim();
+    if (!name || !phone || selectedNums.length === 0) return alert('Completa los campos');
+
+    selectedNums.forEach(idx => { data[idx].participant = { name: name.toUpperCase(), phone }; data[idx].state = 1; });
+    await sync();
+    window.cancelSelection();
+  };
+
+  window.cancelSelection = () => {
+    isSelecting = false;
+    selectedNums = [];
+    document.getElementById('participantPanel').classList.add('hidden');
+    window.updateWhatsappButton();
+    renderGrid();
+  };
+
+  window.clearAll = async () => {
+    if (currentUser && confirm('¿BORRAR TODO EL TABLERO?')) {
+        winners = { menor: '', medio: '', mayor: '', full: '' };
+        initGrid(); await sync();
+    }
+  };
+
+  window.pantallazo = () => { document.body.classList.add('pantallazo-mode'); document.getElementById('exitShot').classList.remove('hidden'); window.scrollTo(0,0); };
+  window.salirPantallazo = () => { document.body.classList.remove('pantallazo-mode'); document.getElementById('exitShot').classList.add('hidden'); };
+
+</script>
+</body>
+</html>
