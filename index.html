@@ -3,1067 +3,312 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBDINÁMICAS | Premium Edition</title>
-
+  <title>SBDINÁMICAS | Pro Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top left, #1e293b, #0f172a);
-      color: #f1f5f9;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+    .glass-panel { background: rgba(255,255,255,0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
+    .glass-input { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.15); color: white; }
+    
+    .state-available { background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.1); }
+    .state-reserved { background: rgba(234,179,8,0.2); border: 1px solid #eab308; }
+    .state-paid { background: rgba(147,51,234,0.3); border: 1px solid #9333ea; }
+    
+    .grid-container { max-height: 55vh; overflow-y: auto; padding: 10px; border-radius: 1rem; }
+    .grid-10x10 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+    .grid-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-height: 42px; }
+    .participant-name { font-size: 6px; text-align: center; line-height: 1; margin-top: 5px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-transform: uppercase; font-weight: bold; }
 
-    .glass-panel {
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 2rem;
-      box-shadow: 0 25px 50px rgba(0,0,0,.5);
-    }
+    /* MODO PANTALLAZO OPTIMIZADO */
+    .pantallazo-mode { background: #0b1120 !important; padding: 0 !important; }
+    .pantallazo-mode .no-print, .pantallazo-mode #adminBtn { display: none !important; }
+    .pantallazo-mode .max-w-4xl { max-width: 100% !important; margin: 0 !important; padding: 10px !important; }
+    .pantallazo-mode .grid-container { max-height: none !important; overflow: visible !important; padding: 0 !important; margin-bottom: 10px; }
+    .pantallazo-mode .grid-10x10 { gap: 0 !important; border: 1px solid rgba(255,255,255,0.1); width: 100%; }
+    .pantallazo-mode .grid-cell { border: 0.5px solid rgba(255,255,255,0.1); border-radius: 0 !important; min-height: 8.2vw !important; }
+    
+    .footer-info { display: none; }
+    .pantallazo-mode .footer-info { display: block; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
 
-    .glass-input {
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.15);
-      color: white;
-    }
-
-    .scroll-grid {
-      overflow-y: auto;
-      padding-right: 10px;
-    }
-    
-    .scroll-grid::-webkit-scrollbar { width: 6px; }
-    .scroll-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-
-    .state-available { background: rgba(255,255,255,0.12); border: 1px dashed rgba(255,255,255,0.25); }
-    .state-reserved { background: rgba(234,179,8,.25); border: 1px solid #eab308; }
-    .state-sold { background: rgba(34,197,94,.25); border: 1px solid #22c55e; }
-    .state-paid { background: rgba(147,51,234,.25); border: 1px solid #9333ea; }
-
-    .pantallazo-mode { 
-      background: #f3f4f6 !important; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center;
-      padding: 10px !important;
-    }
-    .pantallazo-mode .no-print { display: none !important; }
-    .pantallazo-mode #printable { 
-      background: white !important; 
-      color: #111827 !important; 
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
-      border-radius: 0 !important;
-      padding: 10px !important;
-      margin: 0 !important;
-      position: relative;
-    }
-    .pantallazo-mode .participant-name { 
-      display: block !important;
-      font-size: 7px !important;
-      line-height: 1;
-      text-align: center;
-      word-break: break-word;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-    .pantallazo-mode .scroll-grid { 
-      max-height: calc(100vh - 150px) !important;
-      overflow: auto !important;
-    }
-    .pantallazo-mode .grid-number {
-      font-size: 9px !important;
-    }
-
-    .watermark {
-      position: absolute; 
-      top: 50%; 
-      left: 50%; 
-      transform: translate(-50%, -50%) rotate(-45deg);
-      font-size: 4rem; 
-      font-weight: 900; 
-      color: rgba(0,0,0,.03); 
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* Estilos para logos de pago */
-    .payment-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .nequi-logo {
-      background: linear-gradient(135deg, #004C97, #0080FF);
-      color: white;
-    }
-    
-    .daviplata-logo {
-      background: linear-gradient(135deg, #FF6B00, #FF8C00);
-      color: white;
-    }
-    
-    /* Ajuste para pantalla de 10x10 */
-    .grid-10x10 {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 4px;
-      width: 100%;
-    }
-    
-    .grid-cell {
-      aspect-ratio: 1;
-      min-height: 0;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2px;
-    }
-    
-    /* Botón de salir mejorado */
-    .exit-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 100;
-      background: rgba(239, 68, 68, 0.95);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    /* Grid principal más grande */
-    .main-grid {
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-    
-    .normal-mode .grid-10x10 {
-      gap: 6px;
-    }
-    
-    .normal-mode .grid-cell {
-      min-height: 50px;
-    }
-    
-    .normal-mode .grid-number {
-      font-size: 10px;
-      font-weight: bold;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      opacity: 0.7;
-    }
-    
-    .normal-mode .participant-name {
-      font-size: 8px;
-      line-height: 1;
-      text-align: center;
-      word-break: break-word;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      margin-top: 12px;
-      padding: 0 2px;
-    }
-    
-    /* Panel de login */
-    .login-panel {
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Botón guardar cambios */
-    .save-btn {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-    
-    .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
-    }
-    
-    .save-btn:active {
-      transform: translateY(0);
-    }
-    
-    /* Botón marcar como pagado */
-    .paid-btn {
-      background: linear-gradient(135deg, #9333ea, #7c3aed);
-      color: white;
-      font-weight: bold;
-    }
-    
-    /* Panel de ganadores */
-    .winners-panel {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(21, 128, 61, 0.1));
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    
-    .winner-number {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      color: #1c1917;
-      font-weight: 900;
-    }
-    
-    /* Base de datos de participantes */
-    .participants-table {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    
-    .participants-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .participants-table th {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px;
-      text-align: left;
-      font-size: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .participants-table td {
-      padding: 8px;
-      font-size: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .participants-table tr:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-    
-    /* Optimización para móvil */
-    @media (max-width: 480px) {
-      .grid-10x10 {
-        gap: 3px;
-      }
-      
-      #printable {
-        padding: 8px !important;
-      }
-      
-      .watermark {
-        font-size: 3rem;
-      }
-      
-      .normal-mode .grid-cell {
-        min-height: 45px;
-      }
-      
-      .normal-mode .grid-number {
-        font-size: 9px;
-      }
-      
-      .normal-mode .participant-name {
-        font-size: 7px;
-        -webkit-line-clamp: 2;
-      }
-      
-      .login-panel {
-        width: 90% !important;
-        padding: 1.5rem !important;
-      }
-      
-      .participants-table {
-        max-height: 200px;
-      }
-      
-      .participants-table th,
-      .participants-table td {
-        padding: 6px;
-        font-size: 10px;
-      }
-    }
-    
-    @media (min-width: 481px) and (max-width: 768px) {
-      .normal-mode .grid-cell {
-        min-height: 55px;
-      }
-      
-      .normal-mode .participant-name {
-        font-size: 9px;
-        -webkit-line-clamp: 3;
-      }
-    }
+    .exit-pantallazo { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; background: #ef4444; color: white; padding: 10px 20px; border-radius: 50px; font-weight: 900; font-size: 10px; }
+    .pantallazo-mode .exit-pantallazo { display: block; }
   </style>
 </head>
+<body class="p-3">
 
-<body class="p-2 md:p-4 normal-mode">
+<button onclick="handleAdminClick()" id="adminBtn" class="fixed top-4 right-4 w-12 h-12 bg-white/10 backdrop-blur-lg rounded-full z-50 flex items-center justify-center border border-white/20">⚙️</button>
+<button onclick="salirPantallazo()" class="exit-pantallazo shadow-2xl uppercase">✕ Salir de Vista Foto</button>
 
-<a id="whatsappBtn" href="#" target="_blank" class="no-print fixed bottom-6 right-6 w-16 h-16 bg-[#25d366] rounded-full flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition-all z-40 hidden">
-  <svg width="35" height="35" fill="white" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.893-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.89-11.893 11.89-1.997 0-3.951-.5-5.688-1.448l-6.308 1.668zm6.29-3.41c1.574.933 3.103 1.403 4.66 1.403 5.396 0 9.786-4.391 9.786-9.786 0-5.392-4.385-9.783-9.78-9.783-2.617 0-5.08 1.018-6.931 2.87-1.85 1.851-2.868 4.315-2.868 6.913 0 1.706.467 3.374 1.35 4.83l-1.006 3.673 3.795-.997zm11.332-6.845c-.312-.156-1.848-.912-2.135-1.017-.286-.106-.495-.156-.704.156-.21.312-.806.989-.989 1.198-.182.208-.364.234-.676.078-.312-.156-1.318-.486-2.51-1.548-.928-.827-1.554-1.849-1.735-2.16-.182-.312-.02-.481.136-.636.141-.14.312-.364.468-.547.156-.182.208-.312.312-.52.104-.208.052-.39-.026-.547-.078-.156-.704-1.691-.963-2.316-.252-.61-.51-.527-.704-.537-.182-.01-.39-.01-.598-.01-.208 0-.547.078-.833.39-.286.312-1.094 1.067-1.094 2.603 0 1.536 1.12 3.02 1.275 3.228.156.208 2.205 3.367 5.341 4.726.745.323 1.327.516 1.78.66.748.238 1.43.205 1.968.124.6-.09 1.848-.755 2.11-1.485.26-.73.26-1.354.182-1.485-.078-.13-.286-.208-.598-.364z"/></svg>
-</a>
+<div id="adminPanel" class="no-print fixed inset-0 bg-black/95 hidden z-[60] p-4 overflow-y-auto">
+    <div class="max-w-4xl mx-auto bg-slate-900 border border-white/10 rounded-3xl p-6">
+        
+        <div id="loginForm" class="hidden">
+            <h2 class="text-center text-xl font-black mb-6 italic text-blue-400">ACCESO PRIVADO</h2>
+            <input type="email" id="email" class="w-full glass-input p-4 rounded-xl mb-4" placeholder="Correo">
+            <input type="password" id="pass" class="w-full glass-input p-4 rounded-xl mb-6" placeholder="Contraseña">
+            <button onclick="login()" class="w-full bg-blue-600 py-4 rounded-xl font-black">ENTRAR</button>
+            <button onclick="toggleAdmin()" class="w-full text-slate-500 mt-4 text-xs">CERRAR</button>
+        </div>
 
-<button onclick="handleAdminClick()" id="adminBtn" class="no-print fixed top-6 right-6 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center text-2xl transition-all z-40">
-  ⚙️
-</button>
+        <div id="adminDashboard" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black text-blue-400 italic">ADMIN</h2>
+                <button onclick="cerrarSesion()" class="bg-red-600/20 text-red-400 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">Cerrar Sesión</button>
+            </div>
 
-<!-- Panel de Login Integrado -->
-<div id="loginPanel" class="no-print fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
-  <div class="login-panel p-8 rounded-2xl w-full max-w-md">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-black text-white">🔐 ADMIN LOGIN</h1>
-      <button onclick="closeLogin()" class="text-3xl text-white/70 hover:text-white">×</button>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 text-center">
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Ventas</p><p id="statCash" class="text-lg font-black text-green-400">$0</p></div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Pagos</p><p id="statSold" class="text-lg font-black text-purple-400">0/100</p></div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Reservas</p><p id="statReserved" class="text-lg font-black text-yellow-400">0</p></div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Libres</p><p id="statFree" class="text-lg font-black text-blue-400">100</p></div>
+            </div>
+
+            <input type="text" id="adminSearch" oninput="updateParticipantsTable()" placeholder="🔍 Buscar por nombre, número o ciudad..." class="w-full glass-input p-3 rounded-xl mb-4 text-sm">
+            
+            <div class="overflow-x-auto mb-6 max-h-60 overflow-y-auto border border-white/10 rounded-xl">
+                <table class="w-full text-left text-[10px]">
+                    <thead class="bg-white/10 sticky top-0">
+                        <tr><th class="p-2">N°</th><th class="p-2">Info</th><th class="p-2 text-right">Estado / Acciones</th></tr>
+                    </thead>
+                    <tbody id="participantsList"></tbody>
+                </table>
+            </div>
+
+            <button id="saveChangesBtn" onclick="saveChanges()" class="w-full bg-blue-600 py-4 rounded-xl font-black mb-4 opacity-50" disabled>💾 GUARDAR CAMBIOS</button>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="pantallazo()" class="bg-white text-black py-3 rounded-xl font-extrabold text-xs">📸 MODO PANTALLAZO</button>
+                <button onclick="clearAll()" class="bg-red-900/40 text-red-400 py-3 rounded-xl font-extrabold text-xs">🗑️ REINICIAR</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <input id="title" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Título">
+                <input id="prize" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Premio">
+                <input id="value" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" type="number" placeholder="Precio $">
+                <input id="date" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Fecha/Lotería">
+            </div>
+        </div>
     </div>
-    
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Correo Electrónico</label>
-        <input type="email" id="loginEmail" 
-               class="w-full glass-input p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-               placeholder="admin@ejemplo.com"
-               value="admin@sbdinamicas.com">
-      </div>
-      
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Contraseña</label>
-        <input type="password" id="loginPassword" 
-               class="w-full glass-input p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-               placeholder="••••••••"
-               value="admin123">
-      </div>
-      
-      <button onclick="performLogin()" 
-              class="w-full save-btn py-3 rounded-xl font-black mt-6">
-        INICIAR SESIÓN
-      </button>
-    </div>
-    
-    <div class="mt-4 text-center">
-      <p class="text-xs text-slate-400 italic">
-        Solo administradores autorizados
-      </p>
-    </div>
-  </div>
 </div>
 
-<!-- Panel de Administración -->
-<div id="adminPanel" class="no-print fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
-  <div class="glass-panel p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-    <div class="flex justify-between items-center mb-6 text-white">
-      <div class="flex items-center gap-3">
-        <h1 class="text-3xl font-black">⚡ ADMIN PANEL</h1>
-        <span id="adminStatus" class="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full hidden">
-          ✅ Conectado
-        </span>
-      </div>
-      <button onclick="toggleAdmin()" class="text-3xl hover:rotate-90 transition-transform">×</button>
-    </div>
-
-    <!-- Sección de Configuración -->
-    <div class="mb-8">
-      <h2 class="text-xl font-bold mb-4 text-blue-300">📝 CONFIGURACIÓN</h2>
-      <div class="grid md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Título de la Dinámica</label>
-          <input id="title" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="DINÁMICA EFECTIVO FLASH">
-        </div>
-        
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Premio Principal</label>
-          <input id="prize" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="GANA $3.000.000">
-        </div>
-        
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Valor por Número</label>
-          <input id="value" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="VALOR $60.000">
-        </div>
-        
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Fecha / Evento</label>
-          <input id="date" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="CRUZ ROJA - DIC 2025">
-        </div>
-        
-        <div class="md:col-span-2">
-          <label class="block text-sm text-slate-300 mb-2">Texto del Pie</label>
-          <input id="footer" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="SE JUEGA con LAS DOS ÚLTIMAS CIFRAS">
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel de Ganadores -->
-    <div class="mb-8">
-      <h2 class="text-xl font-bold mb-4 text-green-300">🏆 GANADORES</h2>
-      <div class="winners-panel p-6 rounded-2xl mb-4">
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 class="font-bold mb-3 text-white">🎯 Número Ganador</h3>
-            <div class="flex items-center gap-4">
-              <input type="text" id="winningNumber" 
-                     class="glass-input p-3 rounded-xl text-center text-2xl font-black w-32"
-                     placeholder="0000"
-                     maxlength="4"
-                     oninput="calculateWinners()">
-              <button onclick="markWinners()" class="paid-btn px-6 py-3 rounded-xl font-bold">
-                MARCAR GANADORES
-              </button>
-            </div>
-            <p class="text-sm text-slate-300 mt-2">Ingresa el número de 4 cifras de la lotería</p>
-          </div>
-          
-          <div>
-            <h3 class="font-bold mb-3 text-white">🏅 Números Ganadores</h3>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="text-center">
-                <div class="winner-number px-4 py-2 rounded-lg mb-1">23</div>
-                <span class="text-xs text-slate-300">Primeras 2 cifras</span>
-              </div>
-              <div class="text-center">
-                <div class="winner-number px-4 py-2 rounded-lg mb-1">34</div>
-                <span class="text-xs text-slate-300">Medio 2 cifras</span>
-              </div>
-              <div class="text-center">
-                <div class="winner-number px-4 py-2 rounded-lg mb-1">45</div>
-                <span class="text-xs text-slate-300">Últimas 2 cifras</span>
-              </div>
-            </div>
-            <div id="winnersInfo" class="mt-3 text-sm text-slate-300"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Base de Datos de Participantes -->
-    <div class="mb-8">
-      <h2 class="text-xl font-bold mb-4 text-purple-300">📊 PARTICIPANTES REGISTRADOS</h2>
-      <div class="participants-table glass-panel p-4">
-        <table id="participantsTable">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Celular</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="participantsList">
-            <!-- Aquí se llenará dinámicamente -->
-          </tbody>
-        </table>
-        <p id="emptyParticipants" class="text-center text-slate-400 py-4">No hay participantes registrados</p>
-      </div>
-    </div>
-
-    <!-- Botón de Guardar Cambios -->
-    <div class="mb-6">
-      <button id="saveChangesBtn" onclick="saveChanges()" 
-              class="save-btn w-full py-3 rounded-xl font-black opacity-50 cursor-not-allowed" disabled>
-        💾 GUARDAR CAMBIOS
-      </button>
-      <p id="saveStatus" class="text-xs text-slate-400 text-center mt-2 hidden">
-        Cambios guardados exitosamente
-      </p>
-    </div>
-
-    <div class="flex gap-4 mb-4">
-      <button onclick="pantallazo()" class="flex-1 bg-white text-black font-black py-3 rounded-xl hover:bg-white/90 transition-colors">
-        📸 PANTALLAZO
-      </button>
-      <button onclick="clearAll()" class="px-6 bg-red-500/20 text-red-400 rounded-xl font-bold hover:bg-red-500/30 transition-colors">
-        🗑️ BORRAR TODO
-      </button>
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-4 pt-4">
+        <h1 id="showTitle" class="text-2xl md:text-5xl font-black uppercase italic tracking-tighter mb-1"></h1>
+        <p id="showPrize" class="text-blue-400 font-black text-lg md:text-2xl uppercase tracking-widest"></p>
     </div>
     
-    <div class="border-t border-white/10 pt-4">
-      <button onclick="signOutAdmin()" class="w-full py-3 text-slate-400 text-sm hover:text-white transition-colors">
-        👋 Cerrar Sesión Admin
-      </button>
-    </div>
-  </div>
-</div>
-
-<div class="max-w-4xl mx-auto w-full">
-  <div id="printable" class="glass-panel p-4 md:p-6 relative">
-    <div class="text-center mb-4 md:mb-6">
-      <h2 id="showTitle" class="text-2xl md:text-3xl font-black uppercase italic"></h2>
-      <p id="showPrize" class="font-black text-blue-400 text-lg md:text-xl"></p>
-      <p id="showValue" class="text-slate-400 text-sm md:text-base"></p>
+    <div class="grid-container">
+        <div id="grid" class="grid-10x10"></div>
     </div>
 
-    <div class="relative main-grid scroll-grid">
-      <div class="watermark">SB</div>
-      <div id="grid" class="grid-10x10 relative z-10"></div>
+    <div class="footer-info">
+        <p class="text-blue-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">Información del Sorteo</p>
+        <p id="showDate" class="text-white font-medium text-[9px] opacity-80 uppercase"></p>
     </div>
 
-    <div class="mt-4 md:mt-6 mb-4 md:mb-6 text-center">
-      <div id="participantPanel" class="no-print glass-panel p-4 md:p-6 mb-4 md:mb-6 hidden">
-        <h3 class="font-black text-lg md:text-xl mb-4 text-center">👤 DATOS DEL PARTICIPANTE</h3>
-        <div class="grid md:grid-cols-2 gap-3 md:gap-4 mb-4">
-          <input id="partName" class="glass-input p-3 rounded-xl" placeholder="Nombre" maxlength="30">
-          <input id="partLastname" class="glass-input p-3 rounded-xl" placeholder="Apellido" maxlength="30">
-          <input id="partPhone" class="glass-input p-3 rounded-xl" placeholder="Celular" maxlength="15" type="tel">
-          <div class="glass-input p-3 rounded-xl flex items-center justify-center">
-            <span class="text-slate-400">Seleccionados: </span>
-            <span id="selectedCount" class="ml-2 font-black text-2xl text-blue-400">0</span>
-          </div>
-        </div>
-        
-        <!-- Botones de pago con logos -->
-        <div class="mb-4">
-          <p class="text-slate-400 mb-3 text-sm md:text-base">Métodos de pago disponibles:</p>
-          <div class="flex justify-center gap-4 md:gap-6">
-            <div class="flex flex-col items-center">
-              <div class="payment-logo nequi-logo">
-                <span>N</span>
-              </div>
-              <span class="text-xs mt-1">Nequi</span>
+    <div id="participantPanel" class="no-print glass-panel p-5 mt-6 hidden border border-blue-500/30 text-center">
+        <p class="text-blue-400 font-black text-xs mb-4 uppercase italic">Reserva tus números</p>
+        <div class="grid grid-cols-1 gap-2 mb-4">
+            <input id="partName" class="glass-input p-3 rounded-xl text-sm" placeholder="Nombre Completo">
+            <div class="grid grid-cols-2 gap-2">
+                <input id="partCity" class="glass-input p-3 rounded-xl text-sm" placeholder="Ciudad">
+                <input id="partPhone" class="glass-input p-3 rounded-xl text-sm" placeholder="WhatsApp">
             </div>
-            <div class="flex flex-col items-center">
-              <div class="payment-logo daviplata-logo">
-                <span>D</span>
-              </div>
-              <span class="text-xs mt-1">Daviplata</span>
-            </div>
-          </div>
         </div>
-        
-        <div id="selectedNumbers" class="mt-4 flex flex-wrap gap-2 justify-center"></div>
-        
-        <!-- Solo botón de WhatsApp -->
-        <div class="mt-6">
-          <button id="whatsappDataBtn" onclick="sendWhatsappFromData()" class="w-full bg-[#25d366] text-white py-3 rounded-xl font-black flex items-center justify-center gap-2 hover:bg-[#1da851] transition-colors">
-            <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.893-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.89-11.893 11.89-1.997 0-3.951-.5-5.688-1.448l-6.308 1.668zm6.29-3.41c1.574.933 3.103 1.403 4.66 1.403 5.396 0 9.786-4.391 9.786-9.786 0-5.392-4.385-9.783-9.78-9.783-2.617 0-5.08 1.018-6.931 2.87-1.85 1.851-2.868 4.315-2.868 6.913 0 1.706.467 3.374 1.35 4.83l-1.006 3.673 3.795-.997zm11.332-6.845c-.312-.156-1.848-.912-2.135-1.017-.286-.106-.495-.156-.704.156-.21.312-.806.989-.989 1.198-.182.208-.364.234-.676.078-.312-.156-1.318-.486-2.51-1.548-.928-.827-1.554-1.849-1.735-2.16-.182-.312-.02-.481.136-.636.141-.14.312-.364.468-.547.156-.182.208-.312.312-.52.104-.208.052-.39-.026-.547-.078-.156-.704-1.691-.963-2.316-.252-.61-.51-.527-.704-.537-.182-.01-.39-.01-.598-.01-.208 0-.547.078-.833.39-.286.312-1.094 1.067-1.094 2.603 0 1.536 1.12 3.02 1.275 3.228.156.208 2.205 3.367 5.341 4.726.745.323 1.327.516 1.78.66.748.238 1.43.205 1.968.124.6-.09 1.848-.755 2.11-1.485.26-.73.26-1.354.182-1.485-.078-.13-.286-.208-.598-.364z"/></svg>
-            ENVIAR POR WHATSAPP
-          </button>
-        </div>
-      </div>
-
-      <p id="showFooter" class="font-black uppercase text-xs md:text-sm"></p>
-      <p id="showDate" class="text-xs text-slate-400"></p>
+        <div id="selectedNumsDisplay" class="flex flex-wrap gap-2 justify-center mb-4"></div>
+        <button onclick="sendWhatsapp()" class="w-full bg-[#25d366] py-4 rounded-xl font-black text-sm">RESERVAR AHORA</button>
     </div>
-  </div>
 </div>
-
-<button id="exitShot" onclick="salirPantallazo()" class="exit-button px-6 py-3 rounded-xl hidden z-50 text-white font-bold shadow-lg hover:scale-105 transition-transform">
-  ❌ SALIR
-</button>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-    authDomain: "sbdinamicas-2025.firebaseapp.com",
-    projectId: "sbdinamicas-2025",
-    storageBucket: "sbdinamicas-2025.firebasestorage.app",
-    messagingSenderId: "465275725018",
-    appId: "1:465275725018:web:9f58c09a23a74a419171e3"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+        authDomain: "sbdinamicas-2025.firebaseapp.com",
+        projectId: "sbdinamicas-2025",
+        storageBucket: "sbdinamicas-2025.firebasestorage.app",
+        messagingSenderId: "465275725018",
+        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  const docRef = doc(db, "rifas", "dinamica_flash");
-  const MI_TELEFONO = "573215714548";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const docRef = doc(db, "rifas", "dinamica_flash");
+    const MI_PHONE = "573215714548";
 
-  let data = [];
-  let selectedNums = [];
-  let isSelecting = false;
-  let currentUser = null;
-  let unsavedChanges = false;
-  const STATES = ['state-available','state-reserved','state-sold','state-paid'];
+    let data = [];
+    let selected = [];
 
-  // --- AUTH LOGIC ---
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    document.getElementById('adminBtn').textContent = user ? "🛡️" : "⚙️";
-    
-    if (user) {
-      document.getElementById('adminStatus').classList.remove('hidden');
-      document.getElementById('loginPanel').classList.add('hidden');
-      document.getElementById('loginPanel').classList.remove('flex');
-    } else {
-      document.getElementById('adminStatus').classList.add('hidden');
-    }
-  });
-
-  window.handleAdminClick = async () => {
-    if (!currentUser) {
-      openLogin();
-    } else { 
-      toggleAdmin();
-    }
-  };
-
-  window.openLogin = () => {
-    document.getElementById('loginPanel').classList.remove('hidden');
-    document.getElementById('loginPanel').classList.add('flex');
-  };
-
-  window.closeLogin = () => {
-    document.getElementById('loginPanel').classList.add('hidden');
-    document.getElementById('loginPanel').classList.remove('flex');
-  };
-
-  window.performLogin = async () => {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    
-    if (!email || !password) {
-      alert('Por favor ingresa correo y contraseña');
-      return;
-    }
-    
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      closeLogin();
-    } catch (error) {
-      alert('Error de autenticación: ' + error.message);
-    }
-  };
-
-  window.signOutAdmin = () => {
-    signOut(auth).then(() => {
-      toggleAdmin();
-      location.reload();
-    });
-  };
-
-  // --- FUNCIONES DE GUARDADO ---
-  window.markUnsaved = () => {
-    if (currentUser) {
-      unsavedChanges = true;
-      const saveBtn = document.getElementById('saveChangesBtn');
-      saveBtn.disabled = false;
-      saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-      saveBtn.classList.add('opacity-100', 'cursor-pointer');
-    }
-  };
-
-  window.saveChanges = async () => {
-    if (!currentUser) return;
-    
-    const saveBtn = document.getElementById('saveChangesBtn');
-    const saveStatus = document.getElementById('saveStatus');
-    
-    try {
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '⏳ GUARDANDO...';
-      
-      await setDoc(docRef, { 
-        data, 
-        config: {
-          title: document.getElementById('title').value,
-          prize: document.getElementById('prize').value,
-          value: document.getElementById('value').value,
-          date: document.getElementById('date').value,
-          footer: document.getElementById('footer').value
+    onAuthStateChanged(auth, u => {
+        if (u) {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+        } else {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
         }
-      });
-      
-      unsavedChanges = false;
-      saveBtn.innerHTML = '💾 GUARDAR CAMBIOS';
-      saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      saveBtn.classList.remove('opacity-100', 'cursor-pointer');
-      
-      // Mostrar mensaje de éxito
-      saveStatus.classList.remove('hidden');
-      setTimeout(() => {
-        saveStatus.classList.add('hidden');
-      }, 3000);
-      
-    } catch (error) {
-      alert('Error al guardar: ' + error.message);
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = '💾 GUARDAR CAMBIOS';
-    }
-  };
+    });
 
-  // --- FIREBASE SYNC ---
-  onSnapshot(docRef, (docSnap) => {
-    if (docSnap.exists()) {
-      const remote = docSnap.data();
-      data = remote.data;
-      if (remote.config) {
-        document.getElementById('title').value = remote.config.title;
-        document.getElementById('prize').value = remote.config.prize;
-        document.getElementById('value').value = remote.config.value;
-        document.getElementById('date').value = remote.config.date;
-        document.getElementById('footer').value = remote.config.footer;
+    onSnapshot(docRef, s => {
+        if(s.exists()){
+            const r = s.data();
+            data = r.data;
+            if(r.config){
+                ['title','prize','value','date'].forEach(k => {
+                    if(document.getElementById(k)) document.getElementById(k).value = r.config[k];
+                });
+                updateUI();
+            }
+            render(); updateStats(); updateParticipantsTable();
+        } else { init(); }
+    });
+
+    function init(){
+        data = Array.from({length:100}, (_,i)=>({ number: i.toString().padStart(2,'0'), participant: null, state: 0 }));
+        render();
+    }
+
+    window.login = () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        signInWithEmailAndPassword(auth, e, p).catch(() => alert("Error de acceso"));
+    };
+
+    window.cerrarSesion = () => signOut(auth);
+    window.handleAdminClick = () => document.getElementById('adminPanel').classList.toggle('hidden');
+    window.toggleAdmin = () => document.getElementById('adminPanel').classList.add('hidden');
+    
+    window.markUnsaved = () => {
+        const b = document.getElementById('saveChangesBtn');
+        b.disabled = false; b.classList.remove('opacity-50');
+    };
+
+    window.saveChanges = async () => {
+        await setDoc(docRef, { data, config: {
+            title: document.getElementById('title').value,
+            prize: document.getElementById('prize').value,
+            value: document.getElementById('value').value,
+            date: document.getElementById('date').value
+        }});
+        document.getElementById('saveChangesBtn').disabled = true;
+        document.getElementById('saveChangesBtn').classList.add('opacity-50');
+    };
+
+    function updateUI(){
+        document.getElementById('showTitle').innerText = document.getElementById('title').value;
+        document.getElementById('showPrize').innerText = document.getElementById('prize').value;
+        document.getElementById('showDate').innerText = document.getElementById('date').value;
+    }
+
+    function updateStats(){
+        const val = parseInt(document.getElementById('value').value) || 0;
+        const paid = data.filter(d => d.state === 3).length;
+        const res = data.filter(d => d.state === 1).length;
+        document.getElementById('statCash').innerText = `$${(paid * val).toLocaleString()}`;
+        document.getElementById('statSold').innerText = `${paid}/100`;
+        document.getElementById('statReserved').innerText = res;
+        document.getElementById('statFree').innerText = 100 - paid - res;
+    }
+
+    window.render = () => {
+        const g = document.getElementById('grid');
+        g.innerHTML = '';
+        data.forEach((item, i) => {
+            const div = document.createElement('div');
+            const isS = selected.includes(i);
+            div.className = `grid-cell cursor-pointer ${item.state === 3 ? 'state-paid' : item.state === 1 ? 'state-reserved' : 'state-available'} ${isS ? 'ring-2 ring-blue-400 scale-90' : ''}`;
+            div.onclick = () => {
+                if(item.state === 0 || isS) {
+                    const p = selected.indexOf(i);
+                    if(p > -1) selected.splice(p,1); else if(selected.length < 10) selected.push(i);
+                    document.getElementById('participantPanel').classList.toggle('hidden', selected.length === 0);
+                    renderSelected(); render();
+                }
+            };
+            div.innerHTML = `<span class="font-black text-xs">${item.number}</span><span class="participant-name">${item.participant ? item.participant.name : ''}</span>`;
+            g.appendChild(div);
+        });
+    };
+
+    function renderSelected(){
+        const d = document.getElementById('selectedNumsDisplay');
+        d.innerHTML = '';
+        selected.forEach(idx => {
+            const s = document.createElement('span');
+            s.className = "bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-black";
+            s.innerText = data[idx].number;
+            d.appendChild(s);
+        });
+    }
+
+    window.sendWhatsapp = () => {
+        const n = document.getElementById('partName').value.trim();
+        const p = document.getElementById('partPhone').value.trim();
+        const c = document.getElementById('partCity').value.trim();
+        const t = document.getElementById('showTitle').innerText;
+        if(!n || !p || !c) return alert("Completa todos los campos");
         
-        updateHeader();
-      }
-      renderGrid();
-      updateParticipantsTable();
-    } else { 
-      initGrid(); 
-    }
-  });
+        selected.forEach(idx => { 
+            data[idx].participant = { name: n.toUpperCase(), city: c.toUpperCase(), phone: p }; 
+            data[idx].state = 1; 
+        });
 
-  function initGrid() {
-    data = Array.from({length: 100}, (_, i) => ({ 
-      number: i.toString().padStart(2,'0'), 
-      participant: null, 
-      state: 0,
-      paid: false
-    }));
-    renderGrid();
-  }
+        const nums = selected.map(idx => data[idx].number).sort().join(', ');
+        
+        // MENSAJE PROFESIONAL INTEGRADO
+        const mensaje = `*SOLICITUD DE RESERVA - ${t.toUpperCase()}* 🎟️\n` +
+                        `________________________________\n\n` +
+                        `Buen día, deseo confirmar la reserva de mis números:\n\n` +
+                        `🔢 *NÚMEROS:* ${nums}\n` +
+                        `👤 *PARTICIPANTE:* ${n.toUpperCase()}\n` +
+                        `📍 *CIUDAD:* ${c.toUpperCase()}\n\n` +
+                        `________________________________\n\n` +
+                        `Por favor, me indica los métodos de pago disponibles para proceder con la validación.\n\n` +
+                        `¡Muchas gracias!`;
+        
+        window.open(`https://wa.me/${MI_PHONE}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        selected = []; document.getElementById('participantPanel').classList.add('hidden');
+        markUnsaved(); render();
+    };
 
-  // --- WHATSAPP LOGIC ---
-  window.updateWhatsapp = () => {
-    const btn = document.getElementById('whatsappBtn');
-    if (selectedNums.length > 0 && !currentUser) {
-      btn.classList.remove('hidden');
-      const lista = selectedNums.map(idx => data[idx].number).sort().join(', ');
-      const name = document.getElementById('partName').value || 'Cliente';
-      const lastname = document.getElementById('partLastname').value || '';
-      const phone = document.getElementById('partPhone').value || '';
-      
-      const fullName = `${name} ${lastname}`.trim();
-      const info = fullName ? `\nNombre: ${fullName}` : '';
-      const phoneInfo = phone ? `\nCelular: ${phone}` : '';
-      
-      const msg = `¡Hola! Quiero reservar los números: *${lista}*${info}${phoneInfo}\n\n¿Cómo realizo el pago por Nequi o Daviplata?`;
-      btn.href = `https://wa.me/${MI_TELEFONO}?text=${encodeURIComponent(msg)}`;
-    } else { 
-      btn.classList.add('hidden'); 
-    }
-  };
+    window.updateParticipantsTable = () => {
+        const query = document.getElementById('adminSearch').value.toLowerCase();
+        const body = document.getElementById('participantsList');
+        body.innerHTML = '';
+        data.forEach((item, i) => {
+            if(item.participant){
+                if(!item.number.includes(query) && !item.participant.name.toLowerCase().includes(query) && !item.participant.city.toLowerCase().includes(query)) return;
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-white/5";
+                tr.innerHTML = `
+                    <td class="p-2 font-black text-blue-400">${item.number}</td>
+                    <td class="p-2">
+                        <div class="font-bold uppercase">${item.participant.name}</div>
+                        <div class="opacity-50 text-[8px]">${item.participant.city} | ${item.participant.phone}</div>
+                    </td>
+                    <td class="p-2 flex justify-end gap-1">
+                        <button onclick="togglePaid(${i})" class="${item.state === 3 ? 'bg-purple-600' : 'bg-slate-700'} p-2 rounded">✅</button>
+                        <button onclick="deleteRes(${i})" class="bg-red-900/40 text-red-400 p-2 rounded">🗑️</button>
+                    </td>`;
+                body.appendChild(tr);
+            }
+        });
+    };
 
-  // Función para enviar WhatsApp desde el panel de datos
-  window.sendWhatsappFromData = () => {
-    const name = document.getElementById('partName').value.trim();
-    const lastname = document.getElementById('partLastname').value.trim();
-    const phone = document.getElementById('partPhone').value.trim();
+    window.togglePaid = (i) => { 
+        data[i].state = data[i].state === 3 ? 1 : 3; 
+        markUnsaved(); render(); updateStats(); updateParticipantsTable(); 
+    };
     
-    if (selectedNums.length === 0) {
-      alert('Por favor selecciona al menos un número');
-      return;
-    }
-    
-    if (!name) {
-      alert('Por favor ingresa tu nombre');
-      return;
-    }
-    
-    if (!phone) {
-      alert('Por favor ingresa tu número de celular');
-      return;
-    }
-    
-    // Guardar participante
-    selectedNums.forEach(idx => {
-      data[idx].participant = { 
-        name: name.toUpperCase(), 
-        lastname: lastname.toUpperCase(),
-        phone: phone 
-      };
-      data[idx].state = 1; // Reservado
-      data[idx].paid = false; // No pagado aún
-    });
-    
-    markUnsaved();
-    updateParticipantsTable();
-    
-    const lista = selectedNums.map(idx => data[idx].number).sort().join(', ');
-    const fullName = `${name} ${lastname}`.trim();
-    
-    const msg = `¡Hola! Quiero reservar los números: *${lista}*\n\n📋 MIS DATOS:\nNombre: ${fullName}\nCelular: ${phone}\n\n¿Cómo realizo el pago por Nequi o Daviplata?`;
-    const whatsappUrl = `https://wa.me/${MI_TELEFONO}?text=${encodeURIComponent(msg)}`;
-    
-    // Abrir WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    // Limpiar selección después de enviar
-    cancelSelection();
-  };
-
-  // --- UI LOGIC ---
-  window.updateHeader = () => {
-    document.getElementById('showTitle').textContent = document.getElementById('title').value;
-    document.getElementById('showPrize').textContent = document.getElementById('prize').value;
-    document.getElementById('showValue').textContent = document.getElementById('value').value;
-    document.getElementById('showFooter').textContent = document.getElementById('footer').value;
-    document.getElementById('showDate').textContent = document.getElementById('date').value;
-  };
-
-  window.toggleAdmin = () => {
-    const p = document.getElementById('adminPanel');
-    p.classList.toggle('hidden'); 
-    p.classList.toggle('flex');
-  };
-
-  window.toggleNumber = (index) => {
-    if (!isSelecting) {
-      isSelecting = true;
-      document.getElementById('participantPanel').classList.remove('hidden');
-    }
-    const idx = selectedNums.indexOf(index);
-    if (idx > -1) selectedNums.splice(idx, 1);
-    else if (selectedNums.length < 10) selectedNums.push(index);
-    
-    updateSelectedDisplay();
-    updateWhatsapp();
-    renderGrid();
-  };
-
-  function updateSelectedDisplay() {
-    document.getElementById('selectedCount').textContent = selectedNums.length;
-    const container = document.getElementById('selectedNumbers');
-    container.innerHTML = '';
-    selectedNums.sort((a,b)=>a-b).forEach(idx => {
-      const b = document.createElement('span');
-      b.className = 'bg-blue-500 text-white px-3 py-1 rounded-lg font-bold text-sm';
-      b.textContent = data[idx].number;
-      container.appendChild(b);
-    });
-  }
-
-  window.cancelSelection = () => {
-    isSelecting = false;
-    selectedNums = [];
-    document.getElementById('participantPanel').classList.add('hidden');
-    document.getElementById('partName').value = '';
-    document.getElementById('partLastname').value = '';
-    document.getElementById('partPhone').value = '';
-    updateWhatsapp();
-    renderGrid();
-  };
-
-  // --- FUNCIONES PARA MARCAR COMO PAGADO ---
-  window.markAsPaid = async (index) => {
-    if (currentUser && data[index].participant) {
-      data[index].state = 3; // Marcado como pagado
-      data[index].paid = true;
-      markUnsaved();
-      renderGrid();
-      updateParticipantsTable();
-    }
-  };
-
-  // --- BASE DE DATOS DE PARTICIPANTES ---
-  window.updateParticipantsTable = () => {
-    const tableBody = document.getElementById('participantsList');
-    const emptyMsg = document.getElementById('emptyParticipants');
-    
-    // Filtrar solo los números con participantes
-    const participants = data
-      .filter(item => item.participant)
-      .map((item, index) => ({
-        index: index,
-        number: item.number,
-        name: item.participant.name,
-        lastname: item.participant.lastname,
-        phone: item.participant.phone,
-        state: item.state,
-        paid: item.paid
-      }));
-    
-    if (participants.length === 0) {
-      emptyMsg.classList.remove('hidden');
-      tableBody.innerHTML = '';
-      return;
-    }
-    
-    emptyMsg.classList.add('hidden');
-    
-    tableBody.innerHTML = participants.map(part => `
-      <tr>
-        <td class="font-bold">${part.number}</td>
-        <td>${part.name}</td>
-        <td>${part.lastname}</td>
-        <td>${part.phone}</td>
-        <td>
-          <span class="px-2 py-1 rounded text-xs ${
-            part.state === 3 ? 'bg-purple-500/20 text-purple-300' :
-            part.state === 2 ? 'bg-green-500/20 text-green-300' :
-            'bg-yellow-500/20 text-yellow-300'
-          }">
-            ${part.state === 3 ? '✅ Pagado' : 
-              part.state === 2 ? '🏆 Ganador' : 
-              part.state === 1 ? '📝 Reservado' : 'Disponible'}
-          </span>
-        </td>
-        <td>
-          <button onclick="markAsPaid(${part.index})" 
-                  class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 ${part.state === 3 ? 'hidden' : ''}">
-            Marcar Pagado
-          </button>
-        </td>
-      </tr>
-    `).join('');
-  };
-
-  // --- PANEL DE GANADORES ---
-  window.calculateWinners = () => {
-    const winningNumber = document.getElementById('winningNumber').value;
-    
-    if (winningNumber.length === 4) {
-      const firstTwo = winningNumber.substring(0, 2);
-      const middleTwo = winningNumber.substring(1, 3);
-      const lastTwo = winningNumber.substring(2, 4);
-      
-      // Actualizar visualización
-      document.querySelectorAll('.winner-number')[0].textContent = firstTwo;
-      document.querySelectorAll('.winner-number')[1].textContent = middleTwo;
-      document.querySelectorAll('.winner-number')[2].textContent = lastTwo;
-      
-      // Buscar ganadores
-      const winners = data.filter(item => 
-        item.participant && (
-          item.number === firstTwo || 
-          item.number === middleTwo || 
-          item.number === lastTwo
-        )
-      );
-      
-      const winnersInfo = document.getElementById('winnersInfo');
-      if (winners.length > 0) {
-        winnersInfo.innerHTML = `
-          <div class="text-green-400 font-bold">🎉 Ganadores encontrados: ${winners.length}</div>
-          <div class="mt-1 text-xs">${winners.map(w => 
-            `${w.number}: ${w.participant.name} ${w.participant.phone}`
-          ).join('<br>')}</div>
-        `;
-      } else {
-        winnersInfo.innerHTML = '<div class="text-yellow-400">⚠️ No hay ganadores con estos números</div>';
-      }
-    }
-  };
-
-  window.markWinners = () => {
-    const winningNumber = document.getElementById('winningNumber').value;
-    
-    if (winningNumber.length !== 4) {
-      alert('Por favor ingresa un número de 4 cifras');
-      return;
-    }
-    
-    const firstTwo = winningNumber.substring(0, 2);
-    const middleTwo = winningNumber.substring(1, 3);
-    const lastTwo = winningNumber.substring(2, 4);
-    
-    const winningNumbers = [firstTwo, middleTwo, lastTwo];
-    let winnersCount = 0;
-    
-    // Marcar ganadores
-    data.forEach((item, index) => {
-      if (item.participant && winningNumbers.includes(item.number)) {
-        data[index].state = 2; // Marcado como ganador
-        winnersCount++;
-      }
-    });
-    
-    markUnsaved();
-    renderGrid();
-    updateParticipantsTable();
-    
-    alert(`🎊 Se marcaron ${winnersCount} ganadores!\nNúmeros ganadores: ${firstTwo}, ${middleTwo}, ${lastTwo}`);
-  };
-
-  window.renderGrid = () => {
-    const grid = document.getElementById('grid');
-    grid.innerHTML = '';
-    data.forEach((item, index) => {
-      const cell = document.createElement('div');
-      const isSel = selectedNums.includes(index);
-      cell.className = `grid-cell rounded-lg cursor-pointer relative transition-all ${STATES[item.state]} ${isSel ? 'ring-2 ring-blue-500' : ''}`;
-
-      cell.onclick = () => {
-        if (item.state === 2 || item.state === 3) return;
-        if (item.state === 0 || (isSelecting && item.state === 1 && selectedNums.includes(index))) {
-          toggleNumber(index);
-        } else if (item.state === 1 && currentUser) {
-          alert(`Participante: ${item.participant.name} ${item.participant.lastname}\nCel: ${item.participant.phone}\nNúmero: ${item.number}\nEstado: ${item.state === 3 ? '✅ Pagado' : '📝 Reservado'}`);
-        }
-      };
-
-      cell.ondblclick = async e => {
-        e.stopPropagation();
-        if (currentUser && item.state === 1) {
-          if (confirm('¿Vendido/Marcar como Pagado?')) { 
-            data[index].state = 3; // Marcado como pagado
-            data[index].paid = true;
-            markUnsaved();
-            renderGrid();
-            updateParticipantsTable();
-          }
-        }
-      };
-
-      const name = item.participant ? item.participant.name.toUpperCase() : '';
-      cell.innerHTML = `
-        <span class="grid-number">${item.number}</span>
-        <span class="participant-name">${name}</span>
-        ${item.state === 3 ? '<span class="absolute bottom-1 right-1 text-xs">💜</span>' : ''}
-        ${item.state === 2 ? '<span class="absolute bottom-1 right-1 text-xs">🏆</span>' : ''}
-      `;
-      grid.appendChild(cell);
-    });
-  };
-
-  window.clearAll = async () => {
-    if (currentUser && confirm('¿Reiniciar TODO incluyendo participantes y ganadores?')) {
-      data.forEach(i => { 
-        i.participant = null; 
-        i.state = 0; 
-        i.paid = false;
-      });
-      markUnsaved();
-      updateParticipantsTable();
-    }
-  };
-
-  window.pantallazo = () => {
-    document.body.classList.remove('normal-mode');
-    document.body.classList.add('pantallazo-mode');
-    document.getElementById('exitShot').classList.remove('hidden');
-    
-    // Ajustar el grid para pantallazo
-    setTimeout(() => {
-      const grid = document.getElementById('grid');
-      grid.className = 'grid-10x10 relative z-10';
-      
-      // Re-renderizar para ajustar tamaños
-      renderGrid();
-    }, 100);
-  };
-
-  window.salirPantallazo = () => {
-    document.body.classList.remove('pantallazo-mode');
-    document.body.classList.add('normal-mode');
-    document.getElementById('exitShot').classList.add('hidden');
-    
-    // Re-renderizar para volver al modo normal
-    setTimeout(() => {
-      renderGrid();
-    }, 100);
-  };
-  
-  // Inicializar
-  updateHeader();
+    window.deleteRes = (i) => { if(confirm("¿Liberar número?")) { data[i].participant = null; data[i].state = 0; markUnsaved(); render(); updateStats(); updateParticipantsTable(); } };
+    window.pantallazo = () => { document.body.classList.add('pantallazo-mode'); toggleAdmin(); };
+    window.salirPantallazo = () => { document.body.classList.remove('pantallazo-mode'); };
+    window.clearAll = () => { if(confirm("¿BORRAR TODO?")) { init(); markUnsaved(); } };
 </script>
 </body>
 </html>
