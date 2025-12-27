@@ -152,18 +152,18 @@
                 
                 <div class="space-y-3">
                     <div>
-                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TÍTULO PRINCIPAL</label>
-                        <input id="title" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Título que se muestra en la página principal">
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TÍTULO PRINCIPAL (Antiguo - Oculto)</label>
+                        <input id="title" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Este campo ya no se muestra">
                     </div>
                     
                     <div>
-                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DEL PREMIO</label>
-                        <input id="prize" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Texto breve sobre el premio">
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DEL PREMIO (Antiguo - Oculto)</label>
+                        <input id="prize" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Este campo ya no se muestra">
                     </div>
                     
                     <div>
-                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DE FECHA/LOTERÍA</label>
-                        <input id="date" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Ej: 25 Diciembre 2024 - Lotería Nacional">
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DE FECHA/LOTERÍA (Antiguo - Oculto)</label>
+                        <input id="date" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Este campo ya no se muestra">
                     </div>
                     
                     <div>
@@ -179,20 +179,67 @@
 </div>
 
 <div class="max-w-4xl mx-auto">
-    <div class="text-center mb-4 pt-4">
-        <h1 id="showTitle" class="text-2xl md:text-5xl font-black uppercase italic tracking-tighter mb-1"></h1>
-        <p id="showPrize" class="text-blue-400 font-black text-lg md:text-2xl uppercase tracking-widest"></p>
+    <!-- SOLO EL NUEVO PANEL CON INFORMACIÓN DE LA RIFA -->
+    <div id="rifaInfoDisplay" class="glass-panel mb-6 p-6">
+        <div class="space-y-4">
+            <!-- Nombre de la rifa - TAMAÑO GRANDE -->
+            <div class="text-center mb-2">
+                <h1 id="showRifaNombre" class="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-blue-400 mb-1"></h1>
+                <p class="text-[10px] text-slate-400 uppercase font-bold">INFORMACIÓN DEL SORTEO</p>
+            </div>
+            
+            <!-- Premios - TAMAÑO MEDIANO -->
+            <div class="mb-3">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">🎁 PREMIOS</p>
+                <p id="showRifaPremios" class="text-white text-base md:text-lg font-medium leading-relaxed"></p>
+            </div>
+            
+            <!-- Información importante en 2 columnas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-white/5 p-4 rounded-xl">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold mb-2">📅 FECHA DEL SORTEO</p>
+                    <p id="showRifaFecha" class="text-white text-lg font-bold"></p>
+                </div>
+                
+                <div class="bg-white/5 p-4 rounded-xl">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold mb-2">🏆 LOTERÍA OFICIAL</p>
+                    <p id="showRifaLoteria" class="text-white text-lg font-bold"></p>
+                </div>
+            </div>
+            
+            <!-- Precio - Destacado -->
+            <div class="bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl mb-4 text-center">
+                <p class="text-[10px] text-blue-400 uppercase font-bold mb-1">💰 PRECIO POR NÚMERO</p>
+                <p id="showRifaPrecio" class="text-2xl md:text-3xl font-black text-white"></p>
+            </div>
+            
+            <!-- Mecánica del sorteo -->
+            <div class="mb-4">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-2">🎯 MECÁNICA DEL SORTEO</p>
+                <p id="showRifaMecanica" class="text-white text-sm md:text-base leading-relaxed"></p>
+            </div>
+            
+            <!-- Términos y condiciones -->
+            <div class="pt-4 border-t border-white/10">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-2">📜 TÉRMINOS Y CONDICIONES</p>
+                <p id="showRifaTerminos" class="text-slate-300 text-xs md:text-sm italic leading-relaxed"></p>
+            </div>
+        </div>
     </div>
     
+    <!-- Grid de números -->
     <div class="grid-container">
         <div id="grid" class="grid-10x10"></div>
     </div>
 
+    <!-- Información en modo pantallazo -->
     <div class="footer-info">
         <p class="text-blue-400 font-black text-[10px] uppercase tracking-[0.2em] mb-1">Información del Sorteo</p>
-        <p id="showDate" class="text-white font-medium text-[9px] opacity-80 uppercase"></p>
+        <p id="showRifaNombreFooter" class="text-white font-medium text-[9px] opacity-80 uppercase"></p>
+        <p id="showRifaFechaFooter" class="text-white font-medium text-[9px] opacity-80 uppercase"></p>
     </div>
 
+    <!-- Panel de reserva -->
     <div id="participantPanel" class="no-print glass-panel p-5 mt-6 hidden border border-blue-500/30 text-center">
         <p class="text-blue-400 font-black text-xs mb-4 uppercase italic">Reserva tus números</p>
         <div class="grid grid-cols-1 gap-2 mb-4">
@@ -245,7 +292,7 @@
             const r = s.data();
             data = r.data;
             if(r.config){
-                // Configuración básica
+                // Configuración básica (mantenemos por compatibilidad pero no la usamos)
                 ['title','prize','value','date'].forEach(k => {
                     if(document.getElementById(k)) document.getElementById(k).value = r.config[k] || '';
                 });
@@ -311,10 +358,10 @@
         await setDoc(docRef, { 
             data, 
             config: {
-                title: document.getElementById('title').value,
-                prize: document.getElementById('prize').value,
+                title: document.getElementById('title').value, // Mantenemos por compatibilidad
+                prize: document.getElementById('prize').value, // Mantenemos por compatibilidad
                 value: document.getElementById('value').value,
-                date: document.getElementById('date').value,
+                date: document.getElementById('date').value, // Mantenemos por compatibilidad
                 rifaInfo: rifaInfo  // Guardar la información legal del sorteo
             }
         });
@@ -322,12 +369,55 @@
         document.getElementById('saveChangesBtn').disabled = true;
         document.getElementById('saveChangesBtn').classList.add('opacity-50');
         alert("Cambios guardados exitosamente!");
+        updateUI(); // Actualizar la UI después de guardar
     };
 
     function updateUI(){
-        document.getElementById('showTitle').innerText = document.getElementById('title').value || 'SORTEO';
-        document.getElementById('showPrize').innerText = document.getElementById('prize').value || 'PREMIOS ESPECIALES';
-        document.getElementById('showDate').innerText = document.getElementById('date').value || 'Fecha por definir';
+        // Obtener información de la rifa
+        const rifaNombre = document.getElementById('rifaNombre').value;
+        const rifaPremios = document.getElementById('rifaPremios').value;
+        const rifaPrecio = document.getElementById('rifaPrecio').value;
+        const rifaFecha = document.getElementById('rifaFecha').value;
+        const rifaLoteria = document.getElementById('rifaLoteria').value;
+        const rifaMecanica = document.getElementById('rifaMecanica').value;
+        const rifaTerminos = document.getElementById('rifaTerminos').value;
+        
+        // Formatear fecha si existe
+        let fechaFormateada = '';
+        if (rifaFecha) {
+            const fecha = new Date(rifaFecha);
+            fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).toUpperCase();
+        }
+        
+        // Formatear precio si existe
+        let precioFormateado = '';
+        if (rifaPrecio) {
+            const precioNum = parseFloat(rifaPrecio);
+            if (!isNaN(precioNum)) {
+                precioFormateado = `$${precioNum.toLocaleString('es-ES')}`;
+            }
+        }
+        
+        // Actualizar TODOS los campos de visualización con letras más grandes
+        document.getElementById('showRifaNombre').innerText = rifaNombre || 'SORTEO ESPECIAL';
+        document.getElementById('showRifaPremios').innerText = rifaPremios || '¡Premios increíbles por definir!';
+        document.getElementById('showRifaFecha').innerText = fechaFormateada || 'FECHA POR DEFINIR';
+        document.getElementById('showRifaLoteria').innerText = rifaLoteria || 'LOTERÍA OFICIAL POR DEFINIR';
+        document.getElementById('showRifaPrecio').innerText = precioFormateado || 'CONSULTAR';
+        document.getElementById('showRifaMecanica').innerText = rifaMecanica || 'El ganador se determinará mediante sorteo oficial ante notario público.';
+        document.getElementById('showRifaTerminos').innerText = rifaTerminos || 'Participación sujeta a términos y condiciones completos disponibles en el panel de administración.';
+        
+        // Actualizar también para el modo pantallazo
+        document.getElementById('showRifaNombreFooter').innerText = rifaNombre || 'SORTEO';
+        document.getElementById('showRifaFechaFooter').innerText = fechaFormateada ? `Fecha: ${fechaFormateada}` : '';
+        
+        // Actualizar el título de la página
+        document.title = rifaNombre ? `${rifaNombre} | SBDINÁMICAS` : 'SBDINÁMICAS | Pro Edition';
     }
 
     function updateStats(){
@@ -375,7 +465,9 @@
         const n = document.getElementById('partName').value.trim();
         const p = document.getElementById('partPhone').value.trim();
         const c = document.getElementById('partCity').value.trim();
-        const t = document.getElementById('showTitle').innerText;
+        const rifaNombre = document.getElementById('showRifaNombre').innerText;
+        const rifaPrecio = document.getElementById('showRifaPrecio').innerText;
+        
         if(!n || !p || !c) return alert("Completa todos los campos");
         
         selected.forEach(idx => { 
@@ -386,10 +478,11 @@
         const nums = selected.map(idx => data[idx].number).sort().join(', ');
         
         // MENSAJE PROFESIONAL INTEGRADO
-        const mensaje = `*SOLICITUD DE RESERVA - ${t.toUpperCase()}* 🎟️\n` +
+        const mensaje = `*SOLICITUD DE RESERVA - ${rifaNombre.toUpperCase()}* 🎟️\n` +
                         `________________________________\n\n` +
                         `Buen día, deseo confirmar la reserva de mis números:\n\n` +
                         `🔢 *NÚMEROS:* ${nums}\n` +
+                        `💰 *VALOR:* ${rifaPrecio} por número\n` +
                         `👤 *PARTICIPANTE:* ${n.toUpperCase()}\n` +
                         `📍 *CIUDAD:* ${c.toUpperCase()}\n\n` +
                         `________________________________\n\n` +
