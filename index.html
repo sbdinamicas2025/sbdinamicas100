@@ -42,6 +42,7 @@
     .state-available { background: rgba(255,255,255,0.12); border: 1px dashed rgba(255,255,255,0.25); }
     .state-reserved { background: rgba(234,179,8,.25); border: 1px solid #eab308; }
     .state-sold { background: rgba(34,197,94,.25); border: 1px solid #22c55e; }
+    .state-paid { background: rgba(147,51,234,.25); border: 1px solid #9333ea; }
 
     .pantallazo-mode { 
       background: #f3f4f6 !important; 
@@ -210,6 +211,54 @@
       transform: translateY(0);
     }
     
+    /* Botón marcar como pagado */
+    .paid-btn {
+      background: linear-gradient(135deg, #9333ea, #7c3aed);
+      color: white;
+      font-weight: bold;
+    }
+    
+    /* Panel de ganadores */
+    .winners-panel {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(21, 128, 61, 0.1));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .winner-number {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1c1917;
+      font-weight: 900;
+    }
+    
+    /* Base de datos de participantes */
+    .participants-table {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .participants-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .participants-table th {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      text-align: left;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .participants-table td {
+      padding: 8px;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .participants-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
     /* Optimización para móvil */
     @media (max-width: 480px) {
       .grid-10x10 {
@@ -240,6 +289,16 @@
       .login-panel {
         width: 90% !important;
         padding: 1.5rem !important;
+      }
+      
+      .participants-table {
+        max-height: 200px;
+      }
+      
+      .participants-table th,
+      .participants-table td {
+        padding: 6px;
+        font-size: 10px;
       }
     }
     
@@ -307,7 +366,7 @@
 
 <!-- Panel de Administración -->
 <div id="adminPanel" class="no-print fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4">
-  <div class="glass-panel p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  <div class="glass-panel p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center mb-6 text-white">
       <div class="flex items-center gap-3">
         <h1 class="text-3xl font-black">⚡ ADMIN PANEL</h1>
@@ -318,30 +377,99 @@
       <button onclick="toggleAdmin()" class="text-3xl hover:rotate-90 transition-transform">×</button>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-4 mb-6">
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Título de la Dinámica</label>
-        <input id="title" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="DINÁMICA EFECTIVO FLASH">
+    <!-- Sección de Configuración -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4 text-blue-300">📝 CONFIGURACIÓN</h2>
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block text-sm text-slate-300 mb-2">Título de la Dinámica</label>
+          <input id="title" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="DINÁMICA EFECTIVO FLASH">
+        </div>
+        
+        <div>
+          <label class="block text-sm text-slate-300 mb-2">Premio Principal</label>
+          <input id="prize" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="GANA $3.000.000">
+        </div>
+        
+        <div>
+          <label class="block text-sm text-slate-300 mb-2">Valor por Número</label>
+          <input id="value" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="VALOR $60.000">
+        </div>
+        
+        <div>
+          <label class="block text-sm text-slate-300 mb-2">Fecha / Evento</label>
+          <input id="date" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="CRUZ ROJA - DIC 2025">
+        </div>
+        
+        <div class="md:col-span-2">
+          <label class="block text-sm text-slate-300 mb-2">Texto del Pie</label>
+          <input id="footer" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="SE JUEGA con LAS DOS ÚLTIMAS CIFRAS">
+        </div>
       </div>
-      
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Premio Principal</label>
-        <input id="prize" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="GANA $3.000.000">
+    </div>
+
+    <!-- Panel de Ganadores -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4 text-green-300">🏆 GANADORES</h2>
+      <div class="winners-panel p-6 rounded-2xl mb-4">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="font-bold mb-3 text-white">🎯 Número Ganador</h3>
+            <div class="flex items-center gap-4">
+              <input type="text" id="winningNumber" 
+                     class="glass-input p-3 rounded-xl text-center text-2xl font-black w-32"
+                     placeholder="0000"
+                     maxlength="4"
+                     oninput="calculateWinners()">
+              <button onclick="markWinners()" class="paid-btn px-6 py-3 rounded-xl font-bold">
+                MARCAR GANADORES
+              </button>
+            </div>
+            <p class="text-sm text-slate-300 mt-2">Ingresa el número de 4 cifras de la lotería</p>
+          </div>
+          
+          <div>
+            <h3 class="font-bold mb-3 text-white">🏅 Números Ganadores</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="text-center">
+                <div class="winner-number px-4 py-2 rounded-lg mb-1">23</div>
+                <span class="text-xs text-slate-300">Primeras 2 cifras</span>
+              </div>
+              <div class="text-center">
+                <div class="winner-number px-4 py-2 rounded-lg mb-1">34</div>
+                <span class="text-xs text-slate-300">Medio 2 cifras</span>
+              </div>
+              <div class="text-center">
+                <div class="winner-number px-4 py-2 rounded-lg mb-1">45</div>
+                <span class="text-xs text-slate-300">Últimas 2 cifras</span>
+              </div>
+            </div>
+            <div id="winnersInfo" class="mt-3 text-sm text-slate-300"></div>
+          </div>
+        </div>
       </div>
-      
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Valor por Número</label>
-        <input id="value" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="VALOR $60.000">
-      </div>
-      
-      <div>
-        <label class="block text-sm text-slate-300 mb-2">Fecha / Evento</label>
-        <input id="date" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="CRUZ ROJA - DIC 2025">
-      </div>
-      
-      <div class="md:col-span-2">
-        <label class="block text-sm text-slate-300 mb-2">Texto del Pie</label>
-        <input id="footer" oninput="markUnsaved()" class="glass-input p-3 rounded-xl w-full" value="SE JUEGA con LAS DOS ÚLTIMAS CIFRAS">
+    </div>
+
+    <!-- Base de Datos de Participantes -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4 text-purple-300">📊 PARTICIPANTES REGISTRADOS</h2>
+      <div class="participants-table glass-panel p-4">
+        <table id="participantsTable">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Celular</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="participantsList">
+            <!-- Aquí se llenará dinámicamente -->
+          </tbody>
+        </table>
+        <p id="emptyParticipants" class="text-center text-slate-400 py-4">No hay participantes registrados</p>
       </div>
     </div>
 
@@ -464,7 +592,7 @@
   let isSelecting = false;
   let currentUser = null;
   let unsavedChanges = false;
-  const STATES = ['state-available','state-reserved','state-sold'];
+  const STATES = ['state-available','state-reserved','state-sold','state-paid'];
 
   // --- AUTH LOGIC ---
   onAuthStateChanged(auth, (user) => {
@@ -587,14 +715,18 @@
         updateHeader();
       }
       renderGrid();
-    } else { initGrid(); }
+      updateParticipantsTable();
+    } else { 
+      initGrid(); 
+    }
   });
 
   function initGrid() {
     data = Array.from({length: 100}, (_, i) => ({ 
       number: i.toString().padStart(2,'0'), 
       participant: null, 
-      state: 0 
+      state: 0,
+      paid: false
     }));
     renderGrid();
   }
@@ -620,7 +752,7 @@
     }
   };
 
-  // Nueva función para enviar WhatsApp desde el panel de datos
+  // Función para enviar WhatsApp desde el panel de datos
   window.sendWhatsappFromData = () => {
     const name = document.getElementById('partName').value.trim();
     const lastname = document.getElementById('partLastname').value.trim();
@@ -640,6 +772,20 @@
       alert('Por favor ingresa tu número de celular');
       return;
     }
+    
+    // Guardar participante
+    selectedNums.forEach(idx => {
+      data[idx].participant = { 
+        name: name.toUpperCase(), 
+        lastname: lastname.toUpperCase(),
+        phone: phone 
+      };
+      data[idx].state = 1; // Reservado
+      data[idx].paid = false; // No pagado aún
+    });
+    
+    markUnsaved();
+    updateParticipantsTable();
     
     const lista = selectedNums.map(idx => data[idx].number).sort().join(', ');
     const fullName = `${name} ${lastname}`.trim();
@@ -706,6 +852,137 @@
     renderGrid();
   };
 
+  // --- FUNCIONES PARA MARCAR COMO PAGADO ---
+  window.markAsPaid = async (index) => {
+    if (currentUser && data[index].participant) {
+      data[index].state = 3; // Marcado como pagado
+      data[index].paid = true;
+      markUnsaved();
+      renderGrid();
+      updateParticipantsTable();
+    }
+  };
+
+  // --- BASE DE DATOS DE PARTICIPANTES ---
+  window.updateParticipantsTable = () => {
+    const tableBody = document.getElementById('participantsList');
+    const emptyMsg = document.getElementById('emptyParticipants');
+    
+    // Filtrar solo los números con participantes
+    const participants = data
+      .filter(item => item.participant)
+      .map((item, index) => ({
+        index: index,
+        number: item.number,
+        name: item.participant.name,
+        lastname: item.participant.lastname,
+        phone: item.participant.phone,
+        state: item.state,
+        paid: item.paid
+      }));
+    
+    if (participants.length === 0) {
+      emptyMsg.classList.remove('hidden');
+      tableBody.innerHTML = '';
+      return;
+    }
+    
+    emptyMsg.classList.add('hidden');
+    
+    tableBody.innerHTML = participants.map(part => `
+      <tr>
+        <td class="font-bold">${part.number}</td>
+        <td>${part.name}</td>
+        <td>${part.lastname}</td>
+        <td>${part.phone}</td>
+        <td>
+          <span class="px-2 py-1 rounded text-xs ${
+            part.state === 3 ? 'bg-purple-500/20 text-purple-300' :
+            part.state === 2 ? 'bg-green-500/20 text-green-300' :
+            'bg-yellow-500/20 text-yellow-300'
+          }">
+            ${part.state === 3 ? '✅ Pagado' : 
+              part.state === 2 ? '🏆 Ganador' : 
+              part.state === 1 ? '📝 Reservado' : 'Disponible'}
+          </span>
+        </td>
+        <td>
+          <button onclick="markAsPaid(${part.index})" 
+                  class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 ${part.state === 3 ? 'hidden' : ''}">
+            Marcar Pagado
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  };
+
+  // --- PANEL DE GANADORES ---
+  window.calculateWinners = () => {
+    const winningNumber = document.getElementById('winningNumber').value;
+    
+    if (winningNumber.length === 4) {
+      const firstTwo = winningNumber.substring(0, 2);
+      const middleTwo = winningNumber.substring(1, 3);
+      const lastTwo = winningNumber.substring(2, 4);
+      
+      // Actualizar visualización
+      document.querySelectorAll('.winner-number')[0].textContent = firstTwo;
+      document.querySelectorAll('.winner-number')[1].textContent = middleTwo;
+      document.querySelectorAll('.winner-number')[2].textContent = lastTwo;
+      
+      // Buscar ganadores
+      const winners = data.filter(item => 
+        item.participant && (
+          item.number === firstTwo || 
+          item.number === middleTwo || 
+          item.number === lastTwo
+        )
+      );
+      
+      const winnersInfo = document.getElementById('winnersInfo');
+      if (winners.length > 0) {
+        winnersInfo.innerHTML = `
+          <div class="text-green-400 font-bold">🎉 Ganadores encontrados: ${winners.length}</div>
+          <div class="mt-1 text-xs">${winners.map(w => 
+            `${w.number}: ${w.participant.name} ${w.participant.phone}`
+          ).join('<br>')}</div>
+        `;
+      } else {
+        winnersInfo.innerHTML = '<div class="text-yellow-400">⚠️ No hay ganadores con estos números</div>';
+      }
+    }
+  };
+
+  window.markWinners = () => {
+    const winningNumber = document.getElementById('winningNumber').value;
+    
+    if (winningNumber.length !== 4) {
+      alert('Por favor ingresa un número de 4 cifras');
+      return;
+    }
+    
+    const firstTwo = winningNumber.substring(0, 2);
+    const middleTwo = winningNumber.substring(1, 3);
+    const lastTwo = winningNumber.substring(2, 4);
+    
+    const winningNumbers = [firstTwo, middleTwo, lastTwo];
+    let winnersCount = 0;
+    
+    // Marcar ganadores
+    data.forEach((item, index) => {
+      if (item.participant && winningNumbers.includes(item.number)) {
+        data[index].state = 2; // Marcado como ganador
+        winnersCount++;
+      }
+    });
+    
+    markUnsaved();
+    renderGrid();
+    updateParticipantsTable();
+    
+    alert(`🎊 Se marcaron ${winnersCount} ganadores!\nNúmeros ganadores: ${firstTwo}, ${middleTwo}, ${lastTwo}`);
+  };
+
   window.renderGrid = () => {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -715,20 +992,23 @@
       cell.className = `grid-cell rounded-lg cursor-pointer relative transition-all ${STATES[item.state]} ${isSel ? 'ring-2 ring-blue-500' : ''}`;
 
       cell.onclick = () => {
-        if (item.state === 2) return;
+        if (item.state === 2 || item.state === 3) return;
         if (item.state === 0 || (isSelecting && item.state === 1 && selectedNums.includes(index))) {
           toggleNumber(index);
         } else if (item.state === 1 && currentUser) {
-          alert(`Participante: ${item.participant.name}\nCel: ${item.participant.phone}`);
+          alert(`Participante: ${item.participant.name} ${item.participant.lastname}\nCel: ${item.participant.phone}\nNúmero: ${item.number}\nEstado: ${item.state === 3 ? '✅ Pagado' : '📝 Reservado'}`);
         }
       };
 
       cell.ondblclick = async e => {
         e.stopPropagation();
         if (currentUser && item.state === 1) {
-          if (confirm('¿Vendido?')) { 
-            data[index].state = 2; 
+          if (confirm('¿Vendido/Marcar como Pagado?')) { 
+            data[index].state = 3; // Marcado como pagado
+            data[index].paid = true;
             markUnsaved();
+            renderGrid();
+            updateParticipantsTable();
           }
         }
       };
@@ -737,15 +1017,22 @@
       cell.innerHTML = `
         <span class="grid-number">${item.number}</span>
         <span class="participant-name">${name}</span>
+        ${item.state === 3 ? '<span class="absolute bottom-1 right-1 text-xs">💜</span>' : ''}
+        ${item.state === 2 ? '<span class="absolute bottom-1 right-1 text-xs">🏆</span>' : ''}
       `;
       grid.appendChild(cell);
     });
   };
 
   window.clearAll = async () => {
-    if (currentUser && confirm('¿Reiniciar todo?')) {
-      data.forEach(i => { i.participant = null; i.state = 0; });
+    if (currentUser && confirm('¿Reiniciar TODO incluyendo participantes y ganadores?')) {
+      data.forEach(i => { 
+        i.participant = null; 
+        i.state = 0; 
+        i.paid = false;
+      });
       markUnsaved();
+      updateParticipantsTable();
     }
   };
 
