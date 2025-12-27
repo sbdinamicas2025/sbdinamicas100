@@ -33,6 +33,15 @@
 
     .exit-pantallazo { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; background: #ef4444; color: white; padding: 10px 20px; border-radius: 50px; font-weight: 900; font-size: 10px; }
     .pantallazo-mode .exit-pantallazo { display: block; }
+
+    /* Estilos para las pestañas */
+    .tab-button { background: rgba(255,255,255,0.05); border: none; color: #94a3b8; padding: 10px 15px; border-radius: 10px 10px 0 0; font-size: 11px; font-weight: 700; transition: all 0.2s; }
+    .tab-button.active { background: rgba(30, 41, 59, 0.8); color: #60a5fa; border-bottom: 2px solid #60a5fa; }
+    .tab-content { display: none; padding: 20px; background: rgba(30, 41, 59, 0.8); border-radius: 0 10px 10px 10px; }
+    .tab-content.active { display: block; }
+    
+    /* Estilos para textareas */
+    .glass-textarea { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.15); color: white; resize: vertical; min-height: 100px; }
   </style>
 </head>
 <body class="p-3">
@@ -57,37 +66,114 @@
                 <button onclick="cerrarSesion()" class="bg-red-600/20 text-red-400 px-3 py-1 rounded-lg text-[10px] font-bold uppercase">Cerrar Sesión</button>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 text-center">
-                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Ventas</p><p id="statCash" class="text-lg font-black text-green-400">$0</p></div>
-                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Pagos</p><p id="statSold" class="text-lg font-black text-purple-400">0/100</p></div>
-                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Reservas</p><p id="statReserved" class="text-lg font-black text-yellow-400">0</p></div>
-                <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Libres</p><p id="statFree" class="text-lg font-black text-blue-400">100</p></div>
+            <!-- Pestañas para organizar las secciones -->
+            <div class="flex border-b border-white/10 mb-4 overflow-x-auto">
+                <button onclick="switchTab('estadisticas')" id="tabEstadisticas" class="tab-button active">📊 ESTADÍSTICAS</button>
+                <button onclick="switchTab('informacion')" id="tabInformacion" class="tab-button">📋 INFORMACIÓN DEL SORTEO</button>
+                <button onclick="switchTab('participantes')" id="tabParticipantes" class="tab-button">👥 PARTICIPANTES</button>
+                <button onclick="switchTab('configuracion')" id="tabConfiguracion" class="tab-button">⚙️ CONFIGURACIÓN</button>
             </div>
 
-            <input type="text" id="adminSearch" oninput="updateParticipantsTable()" placeholder="🔍 Buscar por nombre, número o ciudad..." class="w-full glass-input p-3 rounded-xl mb-4 text-sm">
-            
-            <div class="overflow-x-auto mb-6 max-h-60 overflow-y-auto border border-white/10 rounded-xl">
-                <table class="w-full text-left text-[10px]">
-                    <thead class="bg-white/10 sticky top-0">
-                        <tr><th class="p-2">N°</th><th class="p-2">Info</th><th class="p-2 text-right">Estado / Acciones</th></tr>
-                    </thead>
-                    <tbody id="participantsList"></tbody>
-                </table>
+            <!-- Contenido de pestaña: Estadísticas -->
+            <div id="contentEstadisticas" class="tab-content active">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 text-center">
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Ventas</p><p id="statCash" class="text-lg font-black text-green-400">$0</p></div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Pagos</p><p id="statSold" class="text-lg font-black text-purple-400">0/100</p></div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Reservas</p><p id="statReserved" class="text-lg font-black text-yellow-400">0</p></div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-slate-400 uppercase">Libres</p><p id="statFree" class="text-lg font-black text-blue-400">100</p></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button onclick="pantallazo()" class="bg-white text-black py-3 rounded-xl font-extrabold text-xs">📸 MODO PANTALLAZO</button>
+                    <button onclick="clearAll()" class="bg-red-900/40 text-red-400 py-3 rounded-xl font-extrabold text-xs">🗑️ REINICIAR</button>
+                </div>
             </div>
 
-            <button id="saveChangesBtn" onclick="saveChanges()" class="w-full bg-blue-600 py-4 rounded-xl font-black mb-4 opacity-50" disabled>💾 GUARDAR CAMBIOS</button>
-            
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="pantallazo()" class="bg-white text-black py-3 rounded-xl font-extrabold text-xs">📸 MODO PANTALLAZO</button>
-                <button onclick="clearAll()" class="bg-red-900/40 text-red-400 py-3 rounded-xl font-extrabold text-xs">🗑️ REINICIAR</button>
+            <!-- Contenido de pestaña: Información del Sorteo -->
+            <div id="contentInformacion" class="tab-content">
+                <p class="text-slate-400 text-xs mb-4">Edita toda la información legal y descriptiva del sorteo:</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">NOMBRE DE LA RIFA</label>
+                        <input id="rifaNombre" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Ej: Gran Sorteo Navideño 2024">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">DESCRIPCIÓN DE LOS PREMIOS</label>
+                        <textarea id="rifaPremios" oninput="markUnsaved()" class="w-full glass-textarea p-3 rounded-xl text-sm" placeholder="Describa detalladamente los premios, especificaciones, características..."></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">PRECIO POR NÚMERO</label>
+                            <input id="rifaPrecio" oninput="markUnsaved()" type="number" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="$0.00">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">FECHA DEL SORTEO</label>
+                            <input id="rifaFecha" oninput="markUnsaved()" type="date" class="w-full glass-input p-3 rounded-xl text-sm">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">LOTERÍA OFICIAL</label>
+                        <input id="rifaLoteria" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Ej: Lotería de Medellín, Sorteo #12345">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">MECÁNICA DEL SORTEO</label>
+                        <textarea id="rifaMecanica" oninput="markUnsaved()" class="w-full glass-textarea p-3 rounded-xl text-sm" placeholder="Describe cómo se determinará al ganador, condiciones, requisitos..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TÉRMINOS Y CONDICIONES</label>
+                        <textarea id="rifaTerminos" oninput="markUnsaved()" class="w-full glass-textarea p-3 rounded-xl text-sm" placeholder="Términos legales, restricciones, políticas..."></textarea>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
-                <input id="title" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Título">
-                <input id="prize" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Premio">
-                <input id="value" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" type="number" placeholder="Precio $">
-                <input id="date" oninput="markUnsaved()" class="glass-input p-2 rounded text-[10px]" placeholder="Fecha/Lotería">
+            <!-- Contenido de pestaña: Participantes -->
+            <div id="contentParticipantes" class="tab-content">
+                <input type="text" id="adminSearch" oninput="updateParticipantsTable()" placeholder="🔍 Buscar por nombre, número o ciudad..." class="w-full glass-input p-3 rounded-xl mb-4 text-sm">
+                
+                <div class="overflow-x-auto max-h-60 overflow-y-auto border border-white/10 rounded-xl">
+                    <table class="w-full text-left text-[10px]">
+                        <thead class="bg-white/10 sticky top-0">
+                            <tr><th class="p-2">N°</th><th class="p-2">Info</th><th class="p-2 text-right">Estado / Acciones</th></tr>
+                        </thead>
+                        <tbody id="participantsList"></tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Contenido de pestaña: Configuración -->
+            <div id="contentConfiguracion" class="tab-content">
+                <p class="text-slate-400 text-xs mb-4">Configuración básica del sistema:</p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TÍTULO PRINCIPAL</label>
+                        <input id="title" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Título que se muestra en la página principal">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DEL PREMIO</label>
+                        <input id="prize" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Texto breve sobre el premio">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">TEXTO DE FECHA/LOTERÍA</label>
+                        <input id="date" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" placeholder="Ej: 25 Diciembre 2024 - Lotería Nacional">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 uppercase font-bold mb-1 block">VALOR DEL NÚMERO</label>
+                        <input id="value" oninput="markUnsaved()" class="w-full glass-input p-3 rounded-xl text-sm" type="number" placeholder="Precio por número en pesos">
+                    </div>
+                </div>
+            </div>
+
+            <button id="saveChangesBtn" onclick="saveChanges()" class="w-full bg-blue-600 py-4 rounded-xl font-black mt-6 opacity-50" disabled>💾 GUARDAR TODOS LOS CAMBIOS</button>
         </div>
     </div>
 </div>
@@ -159,9 +245,21 @@
             const r = s.data();
             data = r.data;
             if(r.config){
+                // Configuración básica
                 ['title','prize','value','date'].forEach(k => {
-                    if(document.getElementById(k)) document.getElementById(k).value = r.config[k];
+                    if(document.getElementById(k)) document.getElementById(k).value = r.config[k] || '';
                 });
+                
+                // Información legal del sorteo
+                if(r.config.rifaInfo) {
+                    const rifaFields = ['rifaNombre', 'rifaPremios', 'rifaPrecio', 'rifaFecha', 'rifaLoteria', 'rifaMecanica', 'rifaTerminos'];
+                    rifaFields.forEach(k => {
+                        if(document.getElementById(k) && r.config.rifaInfo[k]) {
+                            document.getElementById(k).value = r.config.rifaInfo[k];
+                        }
+                    });
+                }
+                
                 updateUI();
             }
             render(); updateStats(); updateParticipantsTable();
@@ -183,26 +281,53 @@
     window.handleAdminClick = () => document.getElementById('adminPanel').classList.toggle('hidden');
     window.toggleAdmin = () => document.getElementById('adminPanel').classList.add('hidden');
     
+    window.switchTab = (tabId) => {
+        // Desactivar todas las pestañas y contenidos
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Activar la pestaña seleccionada
+        document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+        document.getElementById(`content${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+    };
+    
     window.markUnsaved = () => {
         const b = document.getElementById('saveChangesBtn');
         b.disabled = false; b.classList.remove('opacity-50');
     };
 
     window.saveChanges = async () => {
-        await setDoc(docRef, { data, config: {
-            title: document.getElementById('title').value,
-            prize: document.getElementById('prize').value,
-            value: document.getElementById('value').value,
-            date: document.getElementById('date').value
-        }});
+        // Recolectar toda la información del sorteo
+        const rifaInfo = {
+            rifaNombre: document.getElementById('rifaNombre').value,
+            rifaPremios: document.getElementById('rifaPremios').value,
+            rifaPrecio: document.getElementById('rifaPrecio').value,
+            rifaFecha: document.getElementById('rifaFecha').value,
+            rifaLoteria: document.getElementById('rifaLoteria').value,
+            rifaMecanica: document.getElementById('rifaMecanica').value,
+            rifaTerminos: document.getElementById('rifaTerminos').value
+        };
+        
+        await setDoc(docRef, { 
+            data, 
+            config: {
+                title: document.getElementById('title').value,
+                prize: document.getElementById('prize').value,
+                value: document.getElementById('value').value,
+                date: document.getElementById('date').value,
+                rifaInfo: rifaInfo  // Guardar la información legal del sorteo
+            }
+        });
+        
         document.getElementById('saveChangesBtn').disabled = true;
         document.getElementById('saveChangesBtn').classList.add('opacity-50');
+        alert("Cambios guardados exitosamente!");
     };
 
     function updateUI(){
-        document.getElementById('showTitle').innerText = document.getElementById('title').value;
-        document.getElementById('showPrize').innerText = document.getElementById('prize').value;
-        document.getElementById('showDate').innerText = document.getElementById('date').value;
+        document.getElementById('showTitle').innerText = document.getElementById('title').value || 'SORTEO';
+        document.getElementById('showPrize').innerText = document.getElementById('prize').value || 'PREMIOS ESPECIALES';
+        document.getElementById('showDate').innerText = document.getElementById('date').value || 'Fecha por definir';
     }
 
     function updateStats(){
