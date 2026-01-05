@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBDINÁMICAS</title>
+  <title>SBDINÁMICAS PRO | Unificado</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -152,7 +152,7 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
     }
 
-    /* Celdas del Tablero Premium */
+    /* Celdas del Tablero Premium - MEJORADO */
     .grid-cell {
       aspect-ratio: 1;
       border-radius: 1rem;
@@ -201,6 +201,24 @@
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)); 
       border: 1px solid #10b981; 
       color: #34d399; 
+    }
+    
+    /* Estado VENDIDO (Nuevo - del link bio) */
+    .state-sold { 
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.2)); 
+      border: 1px solid #ef4444; 
+      color: #f87171; 
+      cursor: not-allowed;
+      position: relative;
+    }
+    
+    .state-sold::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: #ef4444;
+      transform: rotate(-45deg);
     }
     
     .grid-cell.selected { 
@@ -316,7 +334,7 @@
     .exit-pantallazo {
         position: fixed;
         top: 10px;
-        right: 10px; /* Cambiado de left a right */
+        right: 10px;
         width: 40px;
         height: 40px;
         background: linear-gradient(135deg, #ef4444, #dc2626);
@@ -579,6 +597,20 @@
       0% { transform: translateY(0) rotate(0deg); opacity: 1; }
       100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
     }
+
+    /* Barra de progreso (Del link bio) */
+    .progress-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+      height: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      height: 100%;
+      transition: width 0.5s ease;
+    }
   </style>
 </head>
 <body class="relative">
@@ -591,10 +623,31 @@
     <!-- Header Premium -->
     <div class="header-premium">
       <div class="premium-badge">
-        <i class="fas fa-crown"></i> PREMIUM EDITION
+        <i class="fas fa-crown"></i> UNIFICADO CON LINK BIO
       </div>
-      <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-1 text-center">SB DINÁMICAS</h1>
-      <p class="text-xs text-center text-indigo-200 opacity-90">Sistema Profesional de Gestión de Rifas</p>
+      <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-1 text-center">SB DINÁMICAS PRO</h1>
+      <p class="text-xs text-center text-indigo-200 opacity-90">Sistema Integrado de Gestión de Rifas</p>
+    </div>
+
+    <!-- Barra de progreso (Del link bio) -->
+    <div class="glass-card p-4 mb-4">
+      <div class="grid grid-cols-3 gap-4 mb-3">
+        <div class="text-center">
+          <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Pagados</p>
+          <div id="vendidosCount" class="text-2xl font-extrabold text-emerald-400">0</div>
+        </div>
+        <div class="text-center">
+          <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Disponibles</p>
+          <div id="disponiblesCount" class="text-2xl font-extrabold text-blue-400">100</div>
+        </div>
+        <div class="text-center">
+          <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Ocupación</p>
+          <div id="ocupacionPct" class="text-2xl font-extrabold text-indigo-400">0%</div>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+      </div>
     </div>
 
     <div id="rifaInfoDisplay" class="rifa-info-display glass-card p-4 mb-4">
@@ -652,6 +705,20 @@
 
     <div class="main-content">
         <div class="numbers-container">
+            <!-- Leyenda mejorada -->
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-white uppercase">Selecciona tus números (00-99)</h3>
+              <div class="flex items-center gap-3 text-[10px]">
+                <div class="flex items-center gap-1">
+                  <div class="w-3 h-3 rounded bg-white/10 border border-white/20"></div>
+                  <span class="text-gray-400">Libre</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <div class="w-3 h-3 rounded bg-red-500/20 border border-red-500/30"></div>
+                  <span class="text-gray-400">Vendido</span>
+                </div>
+              </div>
+            </div>
             <div id="grid" class="grid grid-cols-5 gap-2"></div>
         </div>
 
@@ -699,7 +766,7 @@
       </div>
       <div class="text-center">
         <p class="text-[8px] text-slate-500 uppercase font-bold">
-          <i class="fas fa-shield-alt"></i> SBDINÁMICAS PRO v2.0
+          <i class="fas fa-shield-alt"></i> SBDINÁMICAS PRO UNIFICADO v3.0
         </p>
       </div>
     </footer>
@@ -733,7 +800,7 @@
         <div id="adminDashboard" class="hidden">
             <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                 <h2 class="font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent italic">
-                  <i class="fas fa-tachometer-alt"></i> DASHBOARD
+                  <i class="fas fa-tachometer-alt"></i> DASHBOARD UNIFICADO
                 </h2>
                 <button onclick="cerrarSesion()" class="text-red-400 text-[10px] font-bold flex items-center gap-1">
                   <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -889,27 +956,34 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, addDoc, collection, updateDoc, increment, arrayUnion, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+    // 🔥 USANDO LA MISMA BASE DE DATOS DE TU LINK BIO
     const firebaseConfig = {
-        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-        authDomain: "sbdinamicas-2025.firebaseapp.com",
-        projectId: "sbdinamicas-2025",
-        storageBucket: "sbdinamicas-2025.firebasestorage.app",
-        messagingSenderId: "465275725018",
-        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+        apiKey: "AIzaSyBj4J3ZsJZyp8KKnysRyYQkJ7CllrCw4Uk",
+        authDomain: "sb-dinamicas.firebaseapp.com",
+        projectId: "sb-dinamicas",
+        storageBucket: "sb-dinamicas.firebasestorage.app",
+        messagingSenderId: "1058846798988",
+        appId: "1:1058846798988:web:e27b59f99b30bcf98977a9"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    
+    // 📌 Documento principal para la app de rifas (compatible con tu estructura existente)
     const docRef = doc(db, "rifas", "dinamica_flash");
+    // 📌 Documento adicional para sincronización con link bio
+    const docLinkBio = doc(db, "rifas", "rifa_100");
+    
     const MI_PHONE = "573215714548";
 
     let data = [];
     let selected = [];
     let currentTheme = 'dark';
+    let numerosVendidos = []; // Para sincronización con link bio
 
     // Sistema de notificaciones
     function showToast(message, type = 'info', duration = 3000) {
@@ -963,16 +1037,24 @@
         }
     };
 
+    // Autenticación
     onAuthStateChanged(auth, u => {
         document.getElementById('loginForm').classList.toggle('hidden', !!u);
         document.getElementById('adminDashboard').classList.toggle('hidden', !u);
         if (u) showToast('Sesión iniciada', 'success');
     });
 
+    // 📌 ESCUCHAR CAMBIOS DESDE FIREBASE (COMPATIBLE CON AMBAS ESTRUCTURAS)
     onSnapshot(docRef, s => {
         if(s.exists()){
             const r = s.data();
-            data = r.data;
+            data = r.data || Array.from({length:100}, (_,i)=>({ 
+                number: i.toString().padStart(2,'0'), 
+                participant: null, 
+                state: 0 
+            }));
+            
+            // Actualizar UI con datos de la rifa
             if(r.config){
                 ['title','prize','value','date'].forEach(k => {
                     if(document.getElementById(k)) document.getElementById(k).value = r.config[k] || '';
@@ -987,14 +1069,63 @@
                 }
                 updateUI();
             }
-            render(); updateStats(); updateParticipantsTable();
-        } else { init(); }
+            render(); 
+            updateStats();
+            updateParticipantsTable();
+        } else { 
+            // Inicializar si no existe
+            init(); 
+        }
+    });
+
+    // 📌 ESCUCHAR CAMBIOS DESDE EL LINK BIO
+    onSnapshot(docLinkBio, (snap) => {
+        if (snap.exists()) {
+            const linkBioData = snap.data();
+            numerosVendidos = linkBioData.numerosVendidos || [];
+            
+            // Sincronizar con nuestra estructura de datos
+            data.forEach((item, index) => {
+                if (numerosVendidos.includes(item.number)) {
+                    // Si el número está vendido en link bio, marcarlo como pagado
+                    if (item.state !== 3) {
+                        item.state = 3;
+                        item.participant = item.participant || { 
+                            name: 'COMPRADOR LINKBIO', 
+                            city: 'SINCIUDAD', 
+                            phone: 'SINTEL' 
+                        };
+                    }
+                }
+            });
+            
+            render();
+            updateStats();
+            actualizarBarraProgreso();
+            showToast('Sincronizado con link bio', 'success');
+        }
     });
 
     function init(){
-        data = Array.from({length:100}, (_,i)=>({ number: i.toString().padStart(2,'0'), participant: null, state: 0 }));
+        data = Array.from({length:100}, (_,i)=>({ 
+            number: i.toString().padStart(2,'0'), 
+            participant: null, 
+            state: 0 
+        }));
         render();
         showToast('Sistema inicializado', 'success');
+    }
+
+    // 📌 FUNCIÓN MEJORADA PARA ACTUALIZAR BARRA DE PROGRESO (Del link bio)
+    function actualizarBarraProgreso() {
+        const vendidos = data.filter(d => d.state === 3).length;
+        const disponibles = 100 - vendidos;
+        const ocupacion = ((vendidos / 100) * 100).toFixed(1);
+        
+        document.getElementById('vendidosCount').textContent = vendidos;
+        document.getElementById('disponiblesCount').textContent = disponibles;
+        document.getElementById('ocupacionPct').textContent = ocupacion + '%';
+        document.getElementById('progressBar').style.width = ocupacion + '%';
     }
 
     window.login = () => {
@@ -1041,6 +1172,7 @@
         showToast('Cambios pendientes por guardar', 'warning', 2000);
     };
 
+    // 📌 GUARDAR CAMBIOS COMPATIBLE CON AMBAS ESTRUCTURAS
     window.saveChanges = async () => {
         showToast('Guardando cambios...', 'info');
         
@@ -1055,6 +1187,7 @@
         };
         
         try {
+            // Guardar en la estructura principal
             await setDoc(docRef, { 
                 data, 
                 config: {
@@ -1066,10 +1199,22 @@
                 }
             });
             
+            // 📌 SINCRONIZAR CON LINK BIO
+            const numerosPagados = data
+                .filter(item => item.state === 3)
+                .map(item => item.number);
+            
+            await setDoc(docLinkBio, {
+                vendidos: numerosPagados.length,
+                numerosVendidos: numerosPagados,
+                ultimaActualizacion: serverTimestamp()
+            }, { merge: true });
+            
             document.getElementById('saveChangesBtn').disabled = true;
             launchConfetti();
-            showToast('¡Cambios guardados con éxito!', 'success');
+            showToast('¡Cambios guardados y sincronizados!', 'success');
             updateUI();
+            actualizarBarraProgreso();
         } catch (error) {
             showToast('Error al guardar: ' + error.message, 'error');
         }
@@ -1126,16 +1271,38 @@
         document.getElementById('statSoldAdmin').innerText = `${paid}/100`;
         document.getElementById('statReservedAdmin').innerText = res;
         document.getElementById('statFreeAdmin').innerText = free;
+        
+        // Actualizar barra de progreso
+        actualizarBarraProgreso();
     }
 
+    // 📌 RENDER MEJORADO CON ESTADO "VENDIDO"
     window.render = () => {
         const g = document.getElementById('grid');
         g.innerHTML = '';
         data.forEach((item, i) => {
             const div = document.createElement('div');
             const isS = selected.includes(i);
-            div.className = `grid-cell ${item.state === 3 ? 'state-paid' : item.state === 1 ? 'state-reserved' : 'state-available'} ${isS ? 'selected' : ''}`;
+            
+            // Determinar clase según estado
+            let stateClass = 'state-available';
+            if (item.state === 3 || numerosVendidos.includes(item.number)) {
+                stateClass = 'state-sold'; // Usamos el estado "vendido" del link bio
+            } else if (item.state === 1) {
+                stateClass = 'state-reserved';
+            } else if (item.state === 0) {
+                stateClass = 'state-available';
+            }
+            
+            div.className = `grid-cell ${stateClass} ${isS ? 'selected' : ''}`;
+            
             div.onclick = () => {
+                // No permitir seleccionar si está vendido
+                if (item.state === 3 || numerosVendidos.includes(item.number)) {
+                    showToast('Este número ya está vendido', 'error');
+                    return;
+                }
+                
                 if(item.state === 0 || isS) {
                     const p = selected.indexOf(i);
                     if(p > -1) {
@@ -1148,10 +1315,13 @@
                         showToast('Máximo 10 números por reserva', 'warning');
                     }
                     document.getElementById('participantPanel').classList.toggle('hidden', selected.length === 0);
-                    renderSelected(); render();
+                    renderSelected(); 
+                    render();
                 }
             };
-            div.innerHTML = `<span class="font-black text-sm">${item.number}</span><span class="participant-name">${item.participant ? item.participant.name.split(' ')[0] : ''}</span>`;
+            
+            div.innerHTML = `<span class="font-black text-sm">${item.number}</span>
+                            <span class="participant-name">${item.participant ? item.participant.name.split(' ')[0] : ''}</span>`;
             g.appendChild(div);
         });
     };
@@ -1167,7 +1337,8 @@
         });
     }
 
-    window.sendWhatsapp = () => {
+    // 📌 FUNCIÓN MEJORADA DE WHATSAPP
+    window.sendWhatsapp = async () => {
         const n = document.getElementById('partName').value.trim();
         const p = document.getElementById('partPhone').value.trim();
         const c = document.getElementById('partCity').value.trim();
@@ -1182,21 +1353,78 @@
             return;
         }
         
-        selected.forEach(idx => { 
-            data[idx].participant = { name: n.toUpperCase(), city: c.toUpperCase(), phone: p }; 
-            data[idx].state = 1; 
-        });
+        // Verificar disponibilidad con link bio
+        const selectedNumbers = selected.map(idx => data[idx].number);
+        const noDisponibles = selectedNumbers.filter(n => numerosVendidos.includes(n));
         
-        const nums = selected.map(idx => data[idx].number).sort().join(', ');
-        const mensaje = `*SOLICITUD DE RESERVA - SBDINÁMICAS PRO* 🎟️\n\n🔢 *NÚMEROS:* ${nums}\n👤 *PARTICIPANTE:* ${n.toUpperCase()}\n📍 *CIUDAD:* ${c.toUpperCase()}\n📱 *WHATSAPP:* ${p}\n\n_Esta reserva ha sido generada mediante el sistema SBDINÁMICAS PRO_`;
+        if (noDisponibles.length > 0) {
+            showToast(`Los números ${noDisponibles.join(', ')} ya fueron vendidos`, 'error');
+            return;
+        }
         
-        window.open(`https://wa.me/${MI_PHONE}?text=${encodeURIComponent(mensaje)}`, '_blank');
-        selected = []; 
-        document.getElementById('participantPanel').classList.add('hidden');
-        markUnsaved(); 
-        render();
-        showToast(`Reserva enviada para ${nums}`, 'success');
-        launchConfetti();
+        // Guardar en Firebase
+        try {
+            showToast('Procesando reserva...', 'info');
+            
+            selected.forEach(idx => { 
+                data[idx].participant = { 
+                    name: n.toUpperCase(), 
+                    city: c.toUpperCase(), 
+                    phone: p 
+                }; 
+                data[idx].state = 1; 
+            });
+            
+            // Guardar cambios
+            await setDoc(docRef, { 
+                data, 
+                config: {
+                    title: document.getElementById('title').value,
+                    prize: document.getElementById('prize').value,
+                    value: document.getElementById('value').value,
+                    date: document.getElementById('date').value,
+                    rifaInfo: {
+                        rifaNombre: document.getElementById('rifaNombre').value,
+                        rifaPremios: document.getElementById('rifaPremios').value,
+                        rifaPrecio: document.getElementById('rifaPrecio').value,
+                        rifaFecha: document.getElementById('rifaFecha').value,
+                        rifaLoteria: document.getElementById('rifaLoteria').value,
+                        rifaMecanica: document.getElementById('rifaMecanica').value,
+                        rifaTerminos: document.getElementById('rifaTerminos').value
+                    }
+                }
+            });
+            
+            const nums = selectedNumbers.sort().join(', ');
+            const precio = parseInt(document.getElementById('value').value) || 0;
+            const total = selected.length * precio;
+            
+            // Mensaje de WhatsApp mejorado
+            const mensaje = `*🎟️ SOLICITUD DE RESERVA - SBDINÁMICAS PRO*\n\n` +
+                `🔢 *NÚMEROS:* ${nums}\n` +
+                `💰 *VALOR POR NÚMERO:* $${precio.toLocaleString()}\n` +
+                `💰 *TOTAL A PAGAR:* $${total.toLocaleString()}\n` +
+                `👤 *PARTICIPANTE:* ${n.toUpperCase()}\n` +
+                `📍 *CIUDAD:* ${c.toUpperCase()}\n` +
+                `📱 *WHATSAPP:* ${p}\n\n` +
+                `_Esta reserva ha sido generada mediante el sistema SBDINÁMICAS PRO Unificado_`;
+            
+            window.open(`https://wa.me/${MI_PHONE}?text=${encodeURIComponent(mensaje)}`, '_blank');
+            
+            selected = []; 
+            document.getElementById('participantPanel').classList.add('hidden');
+            document.getElementById('partName').value = '';
+            document.getElementById('partPhone').value = '';
+            document.getElementById('partCity').value = '';
+            
+            render();
+            updateStats();
+            showToast(`Reserva enviada para ${nums}`, 'success');
+            launchConfetti();
+            
+        } catch (error) {
+            showToast('Error al procesar: ' + error.message, 'error');
+        }
     };
 
     window.updateParticipantsTable = () => {
@@ -1251,13 +1479,24 @@
         });
     };
 
-    window.togglePaid = (i) => { 
+    window.togglePaid = async (i) => { 
         data[i].state = data[i].state === 3 ? 1 : 3; 
         markUnsaved(); 
         render(); 
         updateStats(); 
         updateParticipantsTable(); 
         showToast(`Estado cambiado para número ${data[i].number}`, 'success');
+        
+        // Sincronizar con link bio
+        if (data[i].state === 3) {
+            // Añadir a link bio
+            await updateDoc(docLinkBio, {
+                numerosVendidos: arrayUnion(data[i].number)
+            }, { merge: true });
+        } else {
+            // Quitar de link bio (necesitarías una función más compleja)
+            showToast('Nota: Cambio no sincronizado automáticamente con link bio', 'warning');
+        }
     };
     
     window.deleteRes = (i) => { 
@@ -1292,9 +1531,16 @@
         showToast('Modo pantallazo desactivado', 'info');
     };
     
-    window.clearAll = () => { 
+    window.clearAll = async () => { 
         if(confirm("⚠️ ¿RESET TOTAL DEL SISTEMA?\n\nEsta acción eliminará TODOS los participantes y restaurará los valores por defecto.")) { 
             init(); 
+            
+            // También limpiar link bio
+            await setDoc(docLinkBio, {
+                vendidos: 0,
+                numerosVendidos: []
+            }, { merge: true });
+            
             markUnsaved(); 
             showToast('Sistema reiniciado completamente', 'warning');
         } 
@@ -1302,8 +1548,9 @@
     
     // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
-        showToast('SBDINÁMICAS PRO cargado', 'success');
+        showToast('SBDINÁMICAS PRO Unificado cargado', 'success');
         updateUI();
+        actualizarBarraProgreso();
     });
 </script>
 </body>
